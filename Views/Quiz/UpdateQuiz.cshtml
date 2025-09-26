@@ -1,0 +1,63 @@
+@model QuizAppDotNetFramework.Models.QuizModel
+
+@{
+    ViewBag.Title = "Update Quiz";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="text-center mb-4">Update Quiz</h2>
+
+@using (Html.BeginForm("UpdateQuiz", "Admin", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.QuizId)
+
+    <div class="form-group mb-3 text-center">
+        <label for="Title">Quiz Title</label>
+        @Html.TextBoxFor(m => m.Title, new { @class = "form-control w-50 mx-auto", placeholder = "Enter title" })
+    </div>
+
+    <h4 class="mt-4">Questions</h4>
+
+    @* Outer loop: over questions (uses null-coalescing to avoid null issues) *@
+    @for (int i = 0; i < (Model.Questions?.Count ?? 0); i++)
+    {
+        <div class="card mb-3 p-3 shadow-sm">
+            @Html.HiddenFor(m => m.Questions[i].QuestionId)
+
+            <div class="form-group">
+                <label>Question @(i + 1)</label>
+                @Html.TextBoxFor(m => m.Questions[i].QuestionText, new { @class = "form-control", placeholder = "Enter question text", required = "required" })
+            </div>
+
+            <div class="mt-3">
+                <h6>Options</h6>
+
+                @* Inner loop: over options for this question (also guarded) *@
+                @for (int j = 0; j < (Model.Questions[i].Options?.Count ?? 0); j++)
+                {
+                    <div class="d-flex align-items-center mb-2">
+                        @Html.HiddenFor(m => m.Questions[i].Options[j].OptionId)
+
+                        @Html.TextBoxFor(
+                            m => m.Questions[i].Options[j].OptionText,
+                            new { @class = "form-control me-2", style = "width:70%", placeholder = "Option text", required = "required" }
+                        )
+
+                        <div class="form-check ms-2">
+                            @Html.CheckBoxFor(
+                                m => m.Questions[i].Options[j].IsCorrect,
+                                new { @class = "form-check-input" }
+                            )
+                            <label class="form-check-label">Correct</label>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <div class="text-center mt-4">
+        <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
+    </div>
+}

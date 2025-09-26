@@ -1,0 +1,15 @@
+@{ 
+    ViewBag.Title = "Add Quiz";
+}
+
+<h2>Add New Quiz</h2>
+
+<form method="post">
+    <label>Quiz Title:</label>
+    <input type="text" name="title" required/>
+    <br /><br/>
+    <button type="submit">Add Quiz</button>
+</form>
+
+<p style="color:green;">@ViewBag.Message</p>
+<p><a href="@Url.Action("Index", "Admin")">Back to Dashboard</a></p>

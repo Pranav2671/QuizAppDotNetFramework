@@ -86,11 +86,11 @@ namespace QuizAppDotNetFramework.Controllers
         }
 
         // POST: Logout
-        [HttpPost]
+        //[HttpPost]
         public ActionResult Logout()
         {
-            Session.Clear();
-            return RedirectToAction("Login");
+            Session.Clear(); // Clear session data
+            return RedirectToAction("Index", "Auth"); // Redirect to login page
         }
     }
 }

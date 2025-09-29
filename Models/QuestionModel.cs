@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace QuizAppDotNetFramework.Models
 {
@@ -8,8 +7,10 @@ namespace QuizAppDotNetFramework.Models
         public Guid QuestionId { get; set; }
         public Guid QuizId { get; set; }
         public string QuestionText { get; set; }
-
-        // THIS MUST BE ADDED
-        public List<OptionModel> Options { get; set; } = new List<OptionModel>();
+        public string OptionA { get; set; }
+        public string OptionB { get; set; }
+        public string OptionC { get; set; }
+        public string OptionD { get; set; }
+        public string CorrectOption { get; set; }
     }
 }

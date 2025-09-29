@@ -1,0 +1,42 @@
+@model IEnumerable<QuizAppDotNetFramework.Models.UserModel>
+
+@{
+    ViewBag.Title = "Manage Users";
+}
+
+<h2>Manage Users</h2>
+
+<!-- Back to Admin Dashboard -->
+<p>
+    <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary">Back to Dashboard</a>
+</p>
+
+<!-- Users Table -->
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Created Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td>@user.Role</td>
+                <td>@user.CreatedDate.ToString("yyyy-MM-dd")</td>
+                <td>
+                    <!-- Delete button -->
+                    <a href="@Url.Action("DeleteUser", "Admin", new { id = user.UserId })"
+                       class="btn btn-danger"
+                       onclick="return confirm('Are you sure you want to delete this user?');">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

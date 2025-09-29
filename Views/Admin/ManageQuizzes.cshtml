@@ -1,0 +1,30 @@
+@model IEnumerable<QuizAppDotNetFramework.Models.QuizModel>
+
+<h2>Manage Quizzes</h2>
+<a href="@Url.Action("AddQuiz", "Admin")" class="btn btn-primary mb-3">Add New Quiz</a>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Title</th>
+            <th>Created By</th>
+            <th>Created Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var quiz in Model)
+        {
+            <tr>
+                <td>@quiz.Title</td>
+                <td>@quiz.CreatedByUsername</td>
+                <td>@quiz.CreatedDate.ToString("dd MMM yyyy")</td>
+                <td>
+                    <a href="@Url.Action("EditQuiz", "Admin", new { id = quiz.QuizId })" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="@Url.Action("DeleteQuiz", "Admin", new { id = quiz.QuizId })" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
+                    <a href="@Url.Action("ManageQuestions", "Admin", new { quizId = quiz.QuizId })" class="btn btn-sm btn-info">Questions</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

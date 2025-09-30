@@ -2,32 +2,48 @@
     ViewBag.Title = "Admin Dashboard";
 }
 
-<h2>Admin Dashboard</h2>
+<div class="container mt-4">
 
-<!-- Logout button -->
-<div class="row mb-3">
-    <div class="col-md-12 text-right">
+    <!-- Header with Logout -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary">Admin Dashboard</h2>
         <a href="@Url.Action("Login", "Auth")" class="btn btn-danger">
             Logout
         </a>
     </div>
-</div>
 
-<!-- Navigation buttons -->
-<div class="row">
-    <div class="col-md-4 mb-2">
-        <a href="@Url.Action("ManageQuizzes", "Admin")" class="btn btn-primary btn-block">
-            Manage Quizzes
-        </a>
+    <!-- Navigation cards -->
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm text-center h-100">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <h5 class="card-title">Manage Quizzes</h5>
+                    <p class="card-text text-muted">Create, edit, or delete quizzes</p>
+                    <a href="@Url.Action("ManageQuizzes", "Admin")" class="btn btn-primary mt-2">Go</a>
+                </div>
+            </div>
+        </div>
+
+        @* Uncomment this if you want Manage Questions card back *@
+        @*<div class="col-md-4 mb-3">
+                <div class="card shadow-sm text-center h-100">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <h5 class="card-title">Manage Questions</h5>
+                        <p class="card-text text-muted">Add or edit quiz questions</p>
+                        <a href="@Url.Action("ManageQuestions", "Admin", new { quizId = Guid.Empty })" class="btn btn-success mt-2">Go</a>
+                    </div>
+                </div>
+            </div>*@
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm text-center h-100">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <h5 class="card-title">Manage Users</h5>
+                    <p class="card-text text-muted">View and manage user accounts</p>
+                    <a href="@Url.Action("ManageUsers", "Admin")" class="btn btn-warning mt-2">Go</a>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="col-md-4 mb-2">
-        <a href="@Url.Action("ManageQuestions", "Admin", new { quizId = Guid.Empty })" class="btn btn-success btn-block">
-            Manage Questions
-        </a>
-    </div>
-    <div class="col-md-4 mb-2">
-        <a href="@Url.Action("ManageUsers", "Admin")" class="btn btn-warning btn-block">
-            Manage Users
-        </a>
-    </div>
+
 </div>

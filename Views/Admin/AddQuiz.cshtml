@@ -2,15 +2,16 @@
 
 <h2>Add New Quiz</h2>
 
-@using (Html.BeginForm())
+@using (Html.BeginForm("AddQuiz", "Admin", FormMethod.Post))
 {
     @Html.AntiForgeryToken()
 
     <div class="form-group">
         @Html.LabelFor(m => m.Title)
         @Html.TextBoxFor(m => m.Title, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Title)
     </div>
 
-    <button type="submit" class="btn btn-success mt-2">Save</button>
-    <a href="@Url.Action("ManageQuizzes", "Admin")" class="btn btn-secondary mt-2">Back</a>
+    <button type="submit" class="btn btn-success mt-2">Add Quiz</button>
+    <a href="@Url.Action("ManageQuizzes", "Admin")" class="btn btn-secondary mt-2">Cancel</a>
 }

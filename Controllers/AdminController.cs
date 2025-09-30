@@ -16,6 +16,10 @@ namespace QuizAppDotNetFramework.Controllers
             return View(); // Shows Admin Dashboard
         }
 
+
+
+
+
         // -------------------- Quiz Management --------------------
         public ActionResult ManageQuizzes()
         {
@@ -23,11 +27,89 @@ namespace QuizAppDotNetFramework.Controllers
             return View(quizzes);
         }
 
+        // GET: Show Add Quiz form
+        public ActionResult AddQuiz()
+        {
+            QuizModel model = new QuizModel();
+            return View(model);
+        }
+
+        // POST: Save new quiz
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AddQuiz(QuizModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                model.QuizId = Guid.NewGuid();              // Generate new quiz ID
+                model.CreatedDate = DateTime.Now;           // Set current date
+
+                // Set CreatedBy from logged-in admin
+                if (Session["UserId"] != null)
+                {
+                    model.CreatedBy = new Guid(Session["UserId"].ToString());
+                }
+                else
+                {
+                    // Optional: fallback to a default admin ID if session is null
+                    return RedirectToAction("ManageQuizzes"); // or show error
+                }
+
+                _quizRepository.AddQuiz(model);             // Insert into database
+                return RedirectToAction("ManageQuizzes");   // Go back to quiz list
+            }
+
+            return View(model); // Return view if validation fails
+        }
+
+
+
         public ActionResult DeleteQuiz(Guid id)
         {
+            // Get all questions for this quiz
+            var questions = _quizRepository.GetQuestionsByQuizId(id);
+
+            // Delete each question
+            foreach (var q in questions)
+            {
+                _quizRepository.DeleteQuestion(q.QuestionId);
+            }
+
+            // Now delete the quiz itself
             _quizRepository.DeleteQuiz(id);
+
+            // Redirect back to Manage Quizzes page
             return RedirectToAction("ManageQuizzes");
         }
+
+
+        // GET: Show quiz data in edit form
+        public ActionResult EditQuiz(Guid id)
+        {
+            var quiz = _quizRepository.GetQuizById(id);
+            if (quiz == null)
+                return HttpNotFound();
+
+            return View(quiz); // Pass quiz data to view
+        }
+
+        // POST: Save edited quiz
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditQuiz(QuizModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                _quizRepository.UpdateQuiz(model);
+                return RedirectToAction("ManageQuizzes");
+            }
+            return View(model); // Return view with errors if validation fails
+        }
+
+
+
+
+
 
         // -------------------- Question Management --------------------
         public ActionResult ManageQuestions(Guid quizId)
@@ -42,6 +124,9 @@ namespace QuizAppDotNetFramework.Controllers
             _quizRepository.DeleteQuestion(id);
             return RedirectToAction("ManageQuestions", new { quizId = quizId });
         }
+
+
+
 
         // -------------------- User Management --------------------
         public ActionResult ManageUsers()

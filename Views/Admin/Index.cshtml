@@ -1,0 +1,33 @@
+﻿@{
+    ViewBag.Title = "Admin Dashboard";
+}
+
+<h2>Admin Dashboard</h2>
+
+<!-- Logout button -->
+<div class="row mb-3">
+    <div class="col-md-12 text-right">
+        <a href="@Url.Action("Login", "Auth")" class="btn btn-danger">
+            Logout
+        </a>
+    </div>
+</div>
+
+<!-- Navigation buttons -->
+<div class="row">
+    <div class="col-md-4 mb-2">
+        <a href="@Url.Action("ManageQuizzes", "Admin")" class="btn btn-primary btn-block">
+            Manage Quizzes
+        </a>
+    </div>
+    <div class="col-md-4 mb-2">
+        <a href="@Url.Action("ManageQuestions", "Admin", new { quizId = Guid.Empty })" class="btn btn-success btn-block">
+            Manage Questions
+        </a>
+    </div>
+    <div class="col-md-4 mb-2">
+        <a href="@Url.Action("ManageUsers", "Admin")" class="btn btn-warning btn-block">
+            Manage Users
+        </a>
+    </div>
+</div>

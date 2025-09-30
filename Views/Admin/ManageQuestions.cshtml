@@ -1,0 +1,38 @@
+@model IEnumerable<QuizAppDotNetFramework.Models.QuestionModel>
+
+
+<h2>Questions for @ViewBag.QuizTitle</h2>
+<a href="@Url.Action("AddQuestion", "Admin", new { quizId = ViewBag.QuizId })" class="btn btn-primary mb-3">Add Question</a>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Question</th>
+            <th>A</th>
+            <th>B</th>
+            <th>C</th>
+            <th>D</th>
+            <th>Correct</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var q in Model)
+        {
+            <tr>
+                <td>@q.QuestionText</td>
+                <td>@q.OptionA</td>
+                <td>@q.OptionB</td>
+                <td>@q.OptionC</td>
+                <td>@q.OptionD</td>
+                <td>@q.CorrectOption</td>
+                <td>
+                    <a href="@Url.Action("EditQuestion", "Admin", new { id = q.QuestionId, quizId = q.QuizId })" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="@Url.Action("DeleteQuestion", "Admin", new { id = q.QuestionId, quizId = q.QuizId })" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("ManageQuizzes", "Admin")" class="btn btn-secondary mt-2">Back to Quizzes</a>

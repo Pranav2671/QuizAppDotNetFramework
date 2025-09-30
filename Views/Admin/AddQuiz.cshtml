@@ -1,0 +1,16 @@
+@model QuizAppDotNetFramework.Models.QuizModel
+
+<h2>Add New Quiz</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Title)
+        @Html.TextBoxFor(m => m.Title, new { @class = "form-control" })
+    </div>
+
+    <button type="submit" class="btn btn-success mt-2">Save</button>
+    <a href="@Url.Action("ManageQuizzes", "Admin")" class="btn btn-secondary mt-2">Back</a>
+}

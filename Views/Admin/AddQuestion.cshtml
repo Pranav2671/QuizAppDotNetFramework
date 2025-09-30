@@ -1,0 +1,38 @@
+@model QuizAppDotNetFramework.Models.QuestionModel
+
+<h2>Edit Question</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.QuestionId)
+    @Html.HiddenFor(m => m.QuizId)
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.QuestionText)
+        @Html.TextBoxFor(m => m.QuestionText, new { @class = "form-control" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.OptionA)
+        @Html.TextBoxFor(m => m.OptionA, new { @class = "form-control" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.OptionB)
+        @Html.TextBoxFor(m => m.OptionB, new { @class = "form-control" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.OptionC)
+        @Html.TextBoxFor(m => m.OptionC, new { @class = "form-control" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.OptionD)
+        @Html.TextBoxFor(m => m.OptionD, new { @class = "form-control" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.CorrectOption)
+        @Html.TextBoxFor(m => m.CorrectOption, new { @class = "form-control" })
+    </div>
+
+    <button type="submit" class="btn btn-success mt-2">Update</button>
+    <a href="@Url.Action("ManageQuestions", "Admin", new { quizId = Model.QuizId })" class="btn btn-secondary mt-2">Back</a>
+}

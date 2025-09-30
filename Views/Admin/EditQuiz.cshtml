@@ -6,6 +6,9 @@
 {
     @Html.AntiForgeryToken()
     @Html.HiddenFor(m => m.QuizId)
+    <p>
+        <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary">Back to Admin Home</a>
+    </p>
 
     <div class="form-group">
         @Html.LabelFor(m => m.Title)

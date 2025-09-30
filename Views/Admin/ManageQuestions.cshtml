@@ -1,7 +1,15 @@
 @model IEnumerable<QuizAppDotNetFramework.Models.QuestionModel>
 
+@{
+    ViewBag.Title = "Manage Questions";
+}
 
-<h2>Questions for @ViewBag.QuizTitle</h2>
+<h2>Questions</h2>
+
+<p>
+    <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary">Back to Admin Home</a>
+</p>
+
 <a href="@Url.Action("AddQuestion", "Admin", new { quizId = ViewBag.QuizId })" class="btn btn-primary mb-3">Add Question</a>
 
 <table class="table table-bordered table-striped">

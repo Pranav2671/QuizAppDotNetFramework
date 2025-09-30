@@ -65,6 +65,56 @@ namespace QuizAppDotNetFramework.Repository
                 cmd.ExecuteNonQuery();
             }
         }
+        // Get single question by ID
+        public QuestionModel GetQuestionById(Guid questionId)
+        {
+            QuestionModel question = null;
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                SqlCommand cmd = new SqlCommand("sp_GetQuestionById", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@QuestionId", questionId);
+
+                con.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    question = new QuestionModel
+                    {
+                        QuestionId = (Guid)reader["QuestionId"],
+                        QuizId = (Guid)reader["QuizId"],
+                        QuestionText = reader["QuestionText"].ToString(),
+                        OptionA = reader["OptionA"].ToString(),
+                        OptionB = reader["OptionB"].ToString(),
+                        OptionC = reader["OptionC"].ToString(),
+                        OptionD = reader["OptionD"].ToString(),
+                        CorrectOption = reader["CorrectOption"].ToString()
+                    };
+                }
+            }
+            return question;
+        }
+
+        // Update question
+        public void UpdateQuestion(QuestionModel question)
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                SqlCommand cmd = new SqlCommand("sp_UpdateQuestion", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@QuestionId", question.QuestionId);
+                cmd.Parameters.AddWithValue("@QuestionText", question.QuestionText);
+                cmd.Parameters.AddWithValue("@OptionA", question.OptionA);
+                cmd.Parameters.AddWithValue("@OptionB", question.OptionB);
+                cmd.Parameters.AddWithValue("@OptionC", question.OptionC);
+                cmd.Parameters.AddWithValue("@OptionD", question.OptionD);
+                cmd.Parameters.AddWithValue("@CorrectOption", question.CorrectOption);
+
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
 
         // Delete a question by QuestionId
         public void DeleteQuestion(Guid questionId)

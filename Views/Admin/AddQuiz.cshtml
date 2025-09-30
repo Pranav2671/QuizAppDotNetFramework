@@ -5,6 +5,9 @@
 @using (Html.BeginForm("AddQuiz", "Admin", FormMethod.Post))
 {
     @Html.AntiForgeryToken()
+    <p>
+        <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary">Back to Admin Home</a>
+    </p>
 
     <div class="form-group">
         @Html.LabelFor(m => m.Title)

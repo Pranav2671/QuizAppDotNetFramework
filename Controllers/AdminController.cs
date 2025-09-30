@@ -9,27 +9,52 @@ namespace QuizAppDotNetFramework.Controllers
     {
         private readonly QuizRepository quizRepo;
         private readonly QuestionRepository questionRepo;
+        private readonly UserRepository userRepo;
 
         public AdminController()
         {
             quizRepo = new QuizRepository();
             questionRepo = new QuestionRepository();
+            userRepo = new UserRepository(); // <-- fixed null reference
         }
 
+        // ----------------- ADMIN DASHBOARD -----------------
         public ActionResult Index()
         {
             return View();
         }
 
+        // ----------------- USER MANAGEMENT -----------------
+        [HttpGet]
+        public ActionResult ManageUsers()
+        {
+            var users = userRepo.GetAllUsers(); // now properly initialized
+            return View(users);
+        }
 
+        [HttpGet]
+        public ActionResult DeleteUser(Guid id)
+        {
+            try
+            {
+                userRepo.DeleteUser(id);
+                TempData["Success"] = "User deleted successfully!";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Failed to delete user: " + ex.Message;
+            }
+
+            return RedirectToAction("ManageUsers");
+        }
 
         // ----------------- QUIZ MANAGEMENT -----------------
-
         public ActionResult ManageQuizzes()
         {
             var quizzes = quizRepo.GetAllQuizzes();
             return View(quizzes);
         }
+
         // GET: Admin/AddQuiz
         public ActionResult AddQuiz()
         {
@@ -46,15 +71,14 @@ namespace QuizAppDotNetFramework.Controllers
                 quiz.QuizId = Guid.NewGuid();
                 quiz.CreatedDate = DateTime.Now;
 
-                // Get current logged-in admin details
+                // Get current logged-in admin details from session
                 var userId = (Guid)Session["UserId"];
                 var username = (string)Session["Username"];
 
                 quiz.CreatedBy = userId;
                 quiz.CreatedByUsername = username;
 
-                QuizRepository quizRepo = new QuizRepository();
-                quizRepo.AddQuiz(quiz);
+                quizRepo.AddQuiz(quiz); // use already initialized repo
 
                 return RedirectToAction("ManageQuizzes");
             }
@@ -62,9 +86,23 @@ namespace QuizAppDotNetFramework.Controllers
             return View(quiz);
         }
 
+        [HttpGet]
+        public ActionResult DeleteQuiz(Guid id)
+        {
+            try
+            {
+                quizRepo.DeleteQuiz(id); // use already initialized repo
+                TempData["Success"] = "Quiz deleted successfully!";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Failed to delete quiz: " + ex.Message;
+            }
+
+            return RedirectToAction("ManageQuizzes");
+        }
 
         // ----------------- QUESTION MANAGEMENT -----------------
-
         public ActionResult ManageQuestions(Guid quizId)
         {
             var questions = questionRepo.GetQuestionsByQuizId(quizId);
@@ -89,6 +127,31 @@ namespace QuizAppDotNetFramework.Controllers
                 return RedirectToAction("ManageQuestions", new { quizId = model.QuizId });
             }
 
+            return View(model);
+        }
+
+        // GET: Admin/EditQuestion
+        [HttpGet]
+        public ActionResult EditQuestion(Guid id, Guid quizId)
+        {
+            var question = questionRepo.GetQuestionById(id); // we will create this method in repo
+            if (question == null)
+                return HttpNotFound();
+
+            question.QuizId = quizId; // keep the quizId for redirect
+            return View(question);
+        }
+
+        // POST: Admin/EditQuestion
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditQuestion(QuestionModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                questionRepo.UpdateQuestion(model); // we will create this method in repo
+                return RedirectToAction("ManageQuestions", new { quizId = model.QuizId });
+            }
             return View(model);
         }
 

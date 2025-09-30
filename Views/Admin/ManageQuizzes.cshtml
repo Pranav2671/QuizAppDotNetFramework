@@ -1,7 +1,20 @@
 @model IEnumerable<QuizAppDotNetFramework.Models.QuizModel>
 
 <h2>Manage Quizzes</h2>
+<p>
+    <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary">Back to Admin Home</a>
+</p>
+
 <a href="@Url.Action("AddQuiz", "Admin")" class="btn btn-primary mb-3">Add New Quiz</a>
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
 
 <table class="table table-bordered table-striped">
     <thead class="table-dark">

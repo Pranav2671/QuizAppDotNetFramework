@@ -7,143 +7,96 @@ namespace QuizAppDotNetFramework.Controllers
 {
     public class AdminController : Controller
     {
-        private QuizRepository _quizRepository = new QuizRepository();
-        private UserRepository _userRepository = new UserRepository();
+        private readonly QuizRepository quizRepo;
+        private readonly QuestionRepository questionRepo;
 
-        // -------------------- Admin Dashboard --------------------
+        public AdminController()
+        {
+            quizRepo = new QuizRepository();
+            questionRepo = new QuestionRepository();
+        }
+
         public ActionResult Index()
         {
-            return View(); // Shows Admin Dashboard
+            return View();
         }
 
 
 
+        // ----------------- QUIZ MANAGEMENT -----------------
 
-
-        // -------------------- Quiz Management --------------------
         public ActionResult ManageQuizzes()
         {
-            var quizzes = _quizRepository.GetAllQuizzes();
+            var quizzes = quizRepo.GetAllQuizzes();
             return View(quizzes);
         }
-
-        // GET: Show Add Quiz form
+        // GET: Admin/AddQuiz
         public ActionResult AddQuiz()
         {
-            QuizModel model = new QuizModel();
-            return View(model);
+            return View();
         }
 
-        // POST: Save new quiz
+        // POST: Admin/AddQuiz
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult AddQuiz(QuizModel model)
+        public ActionResult AddQuiz(QuizModel quiz)
         {
             if (ModelState.IsValid)
             {
-                model.QuizId = Guid.NewGuid();              // Generate new quiz ID
-                model.CreatedDate = DateTime.Now;           // Set current date
+                quiz.QuizId = Guid.NewGuid();
+                quiz.CreatedDate = DateTime.Now;
 
-                // Set CreatedBy from logged-in admin
-                if (Session["UserId"] != null)
-                {
-                    model.CreatedBy = new Guid(Session["UserId"].ToString());
-                }
-                else
-                {
-                    // Optional: fallback to a default admin ID if session is null
-                    return RedirectToAction("ManageQuizzes"); // or show error
-                }
+                // Get current logged-in admin details
+                var userId = (Guid)Session["UserId"];
+                var username = (string)Session["Username"];
 
-                _quizRepository.AddQuiz(model);             // Insert into database
-                return RedirectToAction("ManageQuizzes");   // Go back to quiz list
-            }
+                quiz.CreatedBy = userId;
+                quiz.CreatedByUsername = username;
 
-            return View(model); // Return view if validation fails
-        }
+                QuizRepository quizRepo = new QuizRepository();
+                quizRepo.AddQuiz(quiz);
 
-
-
-        public ActionResult DeleteQuiz(Guid id)
-        {
-            // Get all questions for this quiz
-            var questions = _quizRepository.GetQuestionsByQuizId(id);
-
-            // Delete each question
-            foreach (var q in questions)
-            {
-                _quizRepository.DeleteQuestion(q.QuestionId);
-            }
-
-            // Now delete the quiz itself
-            _quizRepository.DeleteQuiz(id);
-
-            // Redirect back to Manage Quizzes page
-            return RedirectToAction("ManageQuizzes");
-        }
-
-
-        // GET: Show quiz data in edit form
-        public ActionResult EditQuiz(Guid id)
-        {
-            var quiz = _quizRepository.GetQuizById(id);
-            if (quiz == null)
-                return HttpNotFound();
-
-            return View(quiz); // Pass quiz data to view
-        }
-
-        // POST: Save edited quiz
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult EditQuiz(QuizModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                _quizRepository.UpdateQuiz(model);
                 return RedirectToAction("ManageQuizzes");
             }
-            return View(model); // Return view with errors if validation fails
+
+            return View(quiz);
         }
 
 
+        // ----------------- QUESTION MANAGEMENT -----------------
 
-
-
-
-        // -------------------- Question Management --------------------
         public ActionResult ManageQuestions(Guid quizId)
         {
-            var questions = _quizRepository.GetQuestionsByQuizId(quizId);
+            var questions = questionRepo.GetQuestionsByQuizId(quizId);
             ViewBag.QuizId = quizId;
             return View(questions);
         }
 
+        [HttpGet]
+        public ActionResult AddQuestion(Guid quizId)
+        {
+            var model = new QuestionModel { QuizId = quizId };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AddQuestion(QuestionModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                questionRepo.AddQuestion(model);
+                return RedirectToAction("ManageQuestions", new { quizId = model.QuizId });
+            }
+
+            return View(model);
+        }
+
+        [HttpGet]
         public ActionResult DeleteQuestion(Guid id, Guid quizId)
         {
-            _quizRepository.DeleteQuestion(id);
+            questionRepo.DeleteQuestion(id);
             return RedirectToAction("ManageQuestions", new { quizId = quizId });
         }
-
-
-
-
-        // -------------------- User Management --------------------
-        public ActionResult ManageUsers()
-        {
-            var users = _userRepository.GetAllUsers();
-            return View(users);
-        }
-
-        public ActionResult DeleteUser(Guid id)
-        {
-            _userRepository.DeleteUser(id);
-            return RedirectToAction("ManageUsers");
-        }
-        //public ActionResult Logout()
-        //{
-        //    Session.Clear(); // Clear all session data
-        //    return RedirectToAction("Login", "Auth"); // Redirect back to login page
-        //}
     }
 }

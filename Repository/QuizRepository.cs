@@ -31,17 +31,18 @@ namespace QuizAppDotNetFramework.Repository
                 {
                     quizzes.Add(new QuizModel
                     {
-                        QuizId = reader.GetGuid(reader.GetOrdinal("QuizId")),
+                        QuizId = (Guid)reader["QuizId"],
                         Title = reader["Title"].ToString(),
-                        CreatedBy = reader.GetGuid(reader.GetOrdinal("CreatedBy")),
-                        CreatedDate = reader.GetDateTime(reader.GetOrdinal("CreatedDate")),
-                        CreatedByUsername = reader["Username"].ToString() // must match column in SP
+                        CreatedBy = (Guid)reader["CreatedBy"],
+                        CreatedByUsername = reader["CreatedByUsername"].ToString(),
+                        CreatedDate = Convert.ToDateTime(reader["CreatedDate"])
                     });
                 }
             }
 
             return quizzes;
         }
+
 
         // Get quiz by ID
         public QuizModel GetQuizById(Guid quizId)

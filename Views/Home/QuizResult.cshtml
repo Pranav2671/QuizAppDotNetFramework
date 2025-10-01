@@ -1,0 +1,46 @@
+@model IEnumerable<QuizAppDotNetFramework.Models.UserResponseModel>
+@{
+    ViewBag.Title = "Quiz Result";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3">Quiz Result</h2>
+
+    <div class="alert alert-info">
+        <strong>Score:</strong> @ViewBag.CorrectAnswers / @ViewBag.TotalQuestions
+    </div>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Question</th>
+                <th>Your Answer</th>
+                <th>Correct Answer</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var response in Model)
+            {
+                <tr>
+                    <td>@response.QuestionText</td>
+                    <td>@response.SelectedOption</td>
+                    <td>@response.CorrectOption</td>
+                    <td>
+                        @if (response.IsCorrect)
+                        {
+                            <span class="badge bg-success">Correct</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Wrong</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <a href="@Url.Action("Index", "Home")" class="btn btn-primary">Back to Quizzes</a>
+</div>

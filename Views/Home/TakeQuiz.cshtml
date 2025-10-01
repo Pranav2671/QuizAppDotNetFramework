@@ -1,0 +1,31 @@
+@model IEnumerable<QuizAppDotNetFramework.Models.QuestionModel>
+@{
+    ViewBag.Title = "Take Quiz";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3">Take Quiz</h2>
+
+    <form method="post" action="@Url.Action("SubmitQuiz", "Home")">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="QuizID" value="@ViewBag.QuizId" />
+
+        @foreach (var q in Model)
+        {
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <h5>@q.QuestionText</h5>
+                    <div>
+                        <input type="radio" name="answers[@q.QuestionId]" value="A" required /> @q.OptionA <br />
+                        <input type="radio" name="answers[@q.QuestionId]" value="B" /> @q.OptionB <br />
+                        <input type="radio" name="answers[@q.QuestionId]" value="C" /> @q.OptionC <br />
+                        <input type="radio" name="answers[@q.QuestionId]" value="D" /> @q.OptionD <br />
+                    </div>
+                </div>
+            </div>
+        }
+
+        <button type="submit" class="btn btn-success">Submit Quiz</button>
+    </form>
+</div>

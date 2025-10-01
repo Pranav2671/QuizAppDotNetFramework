@@ -1,0 +1,51 @@
+@model List<QuizAppDotNetFramework.Models.QuestionModel>
+
+@{
+    ViewBag.Title = "Take Quiz";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-primary">Take Quiz</h2>
+
+    @using (Html.BeginForm("SubmitQuiz", "User", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        @* Fixed hidden field: use plain HTML to avoid dynamic type issue *@
+        <input type="hidden" name="QuizID" value="@ViewBag.QuizId" />
+
+        @* Loop through each question *@
+        for (int i = 0; i < Model.Count; i++)
+        {
+            var q = Model[i];
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <p class="card-text"><strong>Q@(i + 1):</strong> @q.QuestionText</p>
+
+                    <div class="form-check mb-2">
+                        <input type="radio" name="answers[@q.QuestionId]" value="@q.OptionA" class="form-check-input" id="@q.QuestionId-OptionA" />
+                        <label class="form-check-label" for="@q.QuestionId-OptionA">@q.OptionA</label>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input type="radio" name="answers[@q.QuestionId]" value="@q.OptionB" class="form-check-input" id="@q.QuestionId-OptionB" />
+                        <label class="form-check-label" for="@q.QuestionId-OptionB">@q.OptionB</label>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input type="radio" name="answers[@q.QuestionId]" value="@q.OptionC" class="form-check-input" id="@q.QuestionId-OptionC" />
+                        <label class="form-check-label" for="@q.QuestionId-OptionC">@q.OptionC</label>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input type="radio" name="answers[@q.QuestionId]" value="@q.OptionD" class="form-check-input" id="@q.QuestionId-OptionD" />
+                        <label class="form-check-label" for="@q.QuestionId-OptionD">@q.OptionD</label>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <button type="submit" class="btn btn-success btn-lg mt-3">Submit Quiz</button>
+    }
+</div>

@@ -1,5 +1,32 @@
+@model IEnumerable<QuizAppDotNetFramework.Models.QuizModel>
 @{
-    ViewBag.Title = "User Dashboard";
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<h2>Welcome User to Quiz app</h2>
-<p>Here you can take quizzes and view your results.</p>
+
+<h2>Welcome, @Session["Username"]!</h2>
+<h4>Available Quizzes</h4>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Title</th>
+            <th>Created By</th>
+            <th>Date Created</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var quiz in Model)
+        {
+            <tr>
+                <td>@quiz.Title</td>
+                <td>@quiz.CreatedByUsername</td>
+                <td>@quiz.CreatedDate.ToString("dd MMM yyyy")</td>
+                <td>
+                    <a href="@Url.Action("TakeQuiz", "User", new { quizId = quiz.QuizId })" class="btn btn-primary">Take Quiz</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

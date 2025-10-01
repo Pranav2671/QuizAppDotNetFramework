@@ -27,10 +27,15 @@ namespace QuizAppDotNetFramework.Controllers
         public ActionResult TakeQuiz(Guid quizId)
         {
             var questions = questionRepo.GetQuestionsByQuizId(quizId);
+
             if (questions.Count == 0)
                 return Content("No questions available for this quiz.");
 
             ViewBag.QuizId = quizId;
+
+            // Optional: Clear any previous session answers if you store them
+            Session["CurrentQuizAnswers"] = null;
+
             return View(questions);
         }
 

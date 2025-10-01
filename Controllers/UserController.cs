@@ -1,6 +1,7 @@
 ﻿using QuizAppDotNetFramework.Models;
 using QuizAppDotNetFramework.Repository;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 
@@ -34,34 +35,49 @@ namespace QuizAppDotNetFramework.Controllers
             return View(questions);
         }
 
+        // Handle quiz submission and calculate results
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult SubmitQuiz(Guid quizId, FormCollection answers)
+        public ActionResult SubmitQuiz(Guid QuizID, FormCollection answers)
         {
-            var userId = (Guid)Session["UserId"];
-            var allQuestions = questionRepo.GetQuestionsByQuizId(quizId);
+            var questions = questionRepo.GetQuestionsByQuizId(QuizID);
 
-            UserResponseRepository responseRepo = new UserResponseRepository();
+            int totalQuestions = questions.Count;
+            int correctAnswers = 0;
+            var resultDetails = new List<QuizResultDetail>();
 
-            foreach (var question in allQuestions)
+            foreach (var q in questions)
             {
-                string selectedOption = answers["answers[" + question.QuestionId + "]"];
-                responseRepo.AddResponse(new UserResponseModel
+                // Get user's selected answer for this question
+                string userAnswer = answers["answers[" + q.QuestionId + "]"];
+
+                // Compare letters (A/B/C/D)
+                bool isCorrect = q.CorrectOption.Equals(userAnswer, StringComparison.OrdinalIgnoreCase);
+
+                if (isCorrect)
+                    correctAnswers++;
+
+                resultDetails.Add(new QuizResultDetail
                 {
-                    ResponseId = Guid.NewGuid(),
-                    UserId = userId,
-                    QuizId = quizId,
-                    QuestionId = question.QuestionId,
-                    SelectedOption = selectedOption,
-                    IsCorrect = selectedOption == question.CorrectOption,
-                    ResponseDate = DateTime.Now
+                    QuestionText = q.QuestionText,
+                    CorrectAnswer = q.CorrectOption + ": " + GetOptionText(q, q.CorrectOption),
+                    YourAnswer = (userAnswer != null ? userAnswer + ": " + GetOptionText(q, userAnswer) : "Not Answered"),
+                    IsCorrect = isCorrect
                 });
             }
 
-            return RedirectToAction("QuizResult", new { quizId = quizId });
+            var resultModel = new QuizResultModel
+            {
+                TotalQuestions = totalQuestions,
+                CorrectAnswers = correctAnswers,
+                Score = (totalQuestions > 0) ? (correctAnswers * 100 / totalQuestions) : 0,
+                ResultDetails = resultDetails
+            };
+
+            return View("QuizResult", resultModel);
         }
 
-        // Show quiz result
+        // Optional: Show quiz result from repository (if needed)
         public ActionResult QuizResult(Guid quizId)
         {
             var userId = (Guid)Session["UserId"];
@@ -73,6 +89,19 @@ namespace QuizAppDotNetFramework.Controllers
             ViewBag.CorrectAnswers = responses.Count(r => r.IsCorrect);
 
             return View(responses);
+        }
+
+        // Helper method to get option text from letter
+        private string GetOptionText(QuestionModel q, string option)
+        {
+            switch (option)
+            {
+                case "A": return q.OptionA;
+                case "B": return q.OptionB;
+                case "C": return q.OptionC;
+                case "D": return q.OptionD;
+                default: return "";
+            }
         }
     }
 }

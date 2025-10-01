@@ -1,0 +1,50 @@
+@model QuizAppDotNetFramework.Models.QuizResultModel
+
+@{
+    ViewBag.Title = "Quiz Result";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <h2 class="text-success mb-4">Your Quiz Result</h2>
+
+    <!-- Total Score -->
+    <div class="card mb-4 p-3 shadow-sm">
+        <p><strong>Total Questions:</strong> @Model.TotalQuestions</p>
+        <p><strong>Correct Answers:</strong> @Model.CorrectAnswers</p>
+        <p><strong>Score:</strong> @Model.Score %</p>
+    </div>
+
+    <h3 class="mb-3">Questions and Answers</h3>
+
+    @foreach (var detail in Model.ResultDetails)
+    {
+        <div class="card mb-3 p-3 shadow-sm @(detail.IsCorrect ? "border-success" : "border-danger")">
+            <p><strong>Question:</strong> @detail.QuestionText</p>
+            <p>
+                <strong>Your Answer:</strong>
+                <span style="color:@(detail.IsCorrect ? "green" : "red")">
+                    @GetAnswerText(detail.YourAnswer)
+                </span>
+            </p>
+            <p>
+                <strong>Correct Answer:</strong>
+                <span style="color:green">
+                    @GetAnswerText(detail.CorrectAnswer)
+                </span>
+            </p>
+        </div>
+    }
+</div>
+
+@functions {
+    // Helper to extract the actual text from "A: Option Text"
+    private string GetAnswerText(string answer)
+    {
+        if (string.IsNullOrEmpty(answer))
+            return "Not Answered";
+
+        var parts = answer.Split(new[] { ": " }, StringSplitOptions.None);
+        return (parts.Length == 2) ? parts[1] : answer;
+    }
+}

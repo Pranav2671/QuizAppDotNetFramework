@@ -213,6 +213,7 @@
     <Content Include="Views\Home\QuizResult.cshtml" />
     <Content Include="Views\User\TakeQuiz.cshtml" />
     <Content Include="Views\User\QuizResult.cshtml" />
+    <Content Include="Views\User\QuizHistory.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

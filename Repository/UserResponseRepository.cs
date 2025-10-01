@@ -1,9 +1,9 @@
-﻿using System;
+﻿using QuizAppDotNetFramework.Models;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Configuration;
-using QuizAppDotNetFramework.Models;
 
 namespace QuizAppDotNetFramework.Repository
 {
@@ -26,13 +26,76 @@ namespace QuizAppDotNetFramework.Repository
                 cmd.Parameters.AddWithValue("@SelectedOption", response.SelectedOption);
                 cmd.Parameters.AddWithValue("@IsCorrect", response.IsCorrect);
                 cmd.Parameters.AddWithValue("@ResponseDate", response.ResponseDate);
+                cmd.Parameters.AddWithValue("@AttemptId", response.AttemptId);
 
                 con.Open();
                 cmd.ExecuteNonQuery();
             }
         }
 
-        // Get all responses of a user for a quiz
+        // Get all responses by attempt
+        public List<UserResponseModel> GetUserResponsesByAttempt(Guid attemptId)
+        {
+            List<UserResponseModel> responses = new List<UserResponseModel>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                SqlCommand cmd = new SqlCommand("sp_GetUserResponsesByAttempt", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@AttemptId", attemptId);
+
+                con.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    responses.Add(new UserResponseModel
+                    {
+                        ResponseId = (Guid)reader["ResponseId"],
+                        UserId = (Guid)reader["UserId"],
+                        QuizId = (Guid)reader["QuizId"],
+                        QuestionId = (Guid)reader["QuestionId"],
+                        SelectedOption = reader["SelectedOption"].ToString(),
+                        IsCorrect = (bool)reader["IsCorrect"],
+                        ResponseDate = Convert.ToDateTime(reader["ResponseDate"]),
+                        QuestionText = reader["QuestionText"].ToString(),
+                        CorrectOption = reader["CorrectOption"].ToString(),
+                        AttemptId = (Guid)reader["AttemptId"]
+                    });
+                }
+            }
+            return responses;
+        }
+
+        // Get quiz history grouped by AttemptId
+        public List<UserQuizHistoryModel> GetQuizHistoryForUser(Guid userId)
+        {
+            List<UserQuizHistoryModel> history = new List<UserQuizHistoryModel>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                SqlCommand cmd = new SqlCommand("sp_GetQuizHistoryForUser", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@UserId", userId);
+
+                con.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    history.Add(new UserQuizHistoryModel
+                    {
+                        AttemptId = (Guid)reader["AttemptId"],
+                        QuizId = (Guid)reader["QuizId"],
+                        QuizTitle = reader["QuizTitle"].ToString(),
+                        AttemptedOn = Convert.ToDateTime(reader["AttemptedOn"]),
+                        TotalQuestions = Convert.ToInt32(reader["TotalQuestions"]),
+                        CorrectAnswers = Convert.ToInt32(reader["CorrectAnswers"]),
+                        Score = Convert.ToInt32(reader["Score"])
+                    });
+                }
+            }
+            return history;
+        }
+
         public List<UserResponseModel> GetUserResponsesForQuiz(Guid userId, Guid quizId)
         {
             List<UserResponseModel> responses = new List<UserResponseModel>();
@@ -45,7 +108,6 @@ namespace QuizAppDotNetFramework.Repository
 
                 con.Open();
                 SqlDataReader reader = cmd.ExecuteReader();
-
                 while (reader.Read())
                 {
                     responses.Add(new UserResponseModel
@@ -64,5 +126,21 @@ namespace QuizAppDotNetFramework.Repository
             }
             return responses;
         }
+
+        public void DeleteAttempt(Guid attemptId, Guid userId)
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                SqlCommand cmd = new SqlCommand("sp_DeleteUserResponsesByAttempt", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@AttemptId", attemptId);
+                cmd.Parameters.AddWithValue("@UserId", userId);
+
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+
     }
 }

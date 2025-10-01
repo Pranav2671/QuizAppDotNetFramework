@@ -4,6 +4,7 @@ namespace QuizAppDotNetFramework.Models
 {
     public class UserQuizHistoryModel
     {
+        public Guid AttemptId { get; set; }
         public Guid QuizId { get; set; }
         public string QuizTitle { get; set; }
         public DateTime AttemptedOn { get; set; }

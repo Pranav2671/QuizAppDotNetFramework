@@ -1,0 +1,56 @@
+@model List<QuizAppDotNetFramework.Models.UserQuizHistoryModel>
+
+@{
+    ViewBag.Title = "Your Quiz History";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-primary">Your Quiz History</h2>
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Quiz Title</th>
+                    <th>Date Attempted</th>
+                    <th>Total Questions</th>
+                    <th>Correct Answers</th>
+                    <th>Score (%)</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var h in Model)
+                {
+                    <tr>
+                        <td>@h.QuizTitle</td>
+                        <td>@h.AttemptedOn.ToString("dd-MM-yyyy HH:mm")</td>
+                        <td>@h.TotalQuestions</td>
+                        <td>@h.CorrectAnswers</td>
+                        <td>@h.Score</td>
+                        <td>
+                            <!-- View Result Button -->
+                            @Html.ActionLink("View Result", "QuizResultByAttempt", "User", new { attemptId = h.AttemptId }, new { @class = "btn btn-sm btn-primary me-2" })
+
+                            <!-- Delete Attempt Button -->
+                            @using (Html.BeginForm("DeleteAttempt", "User", FormMethod.Post, new { onsubmit = "return confirm('Are you sure you want to delete this attempt?');", style = "display:inline;" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                @Html.Hidden("attemptId", h.AttemptId)
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            You have not attempted any quizzes yet.
+        </div>
+    }
+</div>

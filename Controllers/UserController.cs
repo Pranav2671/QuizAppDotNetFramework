@@ -11,11 +11,11 @@ namespace QuizAppDotNetFramework.Controllers
     {
         private readonly QuizRepository quizRepo = new QuizRepository();
         private readonly QuestionRepository questionRepo = new QuestionRepository();
+        private readonly UserResponseRepository responseRepo = new UserResponseRepository();
 
-        // User Dashboard - shows quizzes
+        // User Dashboard - list quizzes
         public ActionResult Index()
         {
-            // Ensure user is logged in
             if (Session["Role"] == null || Session["Role"].ToString() != "User")
                 return RedirectToAction("Login", "Auth");
 
@@ -23,11 +23,10 @@ namespace QuizAppDotNetFramework.Controllers
             return View(quizzes);
         }
 
-        // Show quiz questions
+        // Take Quiz
         public ActionResult TakeQuiz(Guid quizId)
         {
             var questions = questionRepo.GetQuestionsByQuizId(quizId);
-
             if (questions.Count == 0)
                 return Content("No questions available for this quiz.");
 
@@ -35,36 +34,46 @@ namespace QuizAppDotNetFramework.Controllers
             return View(questions);
         }
 
-        // Handle quiz submission and calculate results
+        // Submit Quiz
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult SubmitQuiz(Guid QuizID, FormCollection answers)
         {
             var questions = questionRepo.GetQuestionsByQuizId(QuizID);
+            var userId = (Guid)Session["UserId"];
 
-            int totalQuestions = questions.Count;
-            int correctAnswers = 0;
-            var resultDetails = new List<QuizResultDetail>();
+            // ✅ One AttemptId per quiz attempt
+            Guid attemptId = Guid.NewGuid();
 
             foreach (var q in questions)
             {
-                // Get user's selected answer for this question
                 string userAnswer = answers["answers[" + q.QuestionId + "]"];
-
-                // Compare letters (A/B/C/D)
                 bool isCorrect = q.CorrectOption.Equals(userAnswer, StringComparison.OrdinalIgnoreCase);
 
-                if (isCorrect)
-                    correctAnswers++;
-
-                resultDetails.Add(new QuizResultDetail
+                responseRepo.AddResponse(new UserResponseModel
                 {
-                    QuestionText = q.QuestionText,
-                    CorrectAnswer = q.CorrectOption + ": " + GetOptionText(q, q.CorrectOption),
-                    YourAnswer = (userAnswer != null ? userAnswer + ": " + GetOptionText(q, userAnswer) : "Not Answered"),
-                    IsCorrect = isCorrect
+                    ResponseId = Guid.NewGuid(),
+                    UserId = userId,
+                    QuizId = QuizID,
+                    QuestionId = q.QuestionId,
+                    SelectedOption = userAnswer,
+                    IsCorrect = isCorrect,
+                    ResponseDate = DateTime.Now,
+                    AttemptId = attemptId
                 });
             }
+
+            // Prepare result to display immediately
+            var resultDetails = questions.Select(q => new QuizResultDetail
+            {
+                QuestionText = q.QuestionText,
+                CorrectAnswer = q.CorrectOption,
+                YourAnswer = answers["answers[" + q.QuestionId + "]"],
+                IsCorrect = q.CorrectOption.Equals(answers["answers[" + q.QuestionId + "]"], StringComparison.OrdinalIgnoreCase)
+            }).ToList();
+
+            int totalQuestions = questions.Count;
+            int correctAnswers = resultDetails.Count(r => r.IsCorrect);
 
             var resultModel = new QuizResultModel
             {
@@ -77,31 +86,59 @@ namespace QuizAppDotNetFramework.Controllers
             return View("QuizResult", resultModel);
         }
 
-        // Optional: Show quiz result from repository (if needed)
-        public ActionResult QuizResult(Guid quizId)
+        // View Quiz History
+        public ActionResult QuizHistory()
         {
+            if (Session["UserId"] == null)
+                return RedirectToAction("Login", "Auth");
+
             var userId = (Guid)Session["UserId"];
-            UserResponseRepository responseRepo = new UserResponseRepository();
-
-            var responses = responseRepo.GetUserResponsesForQuiz(userId, quizId);
-
-            ViewBag.TotalQuestions = responses.Count;
-            ViewBag.CorrectAnswers = responses.Count(r => r.IsCorrect);
-
-            return View(responses);
+            var history = responseRepo.GetQuizHistoryForUser(userId);
+            return View(history);
         }
 
-        // Helper method to get option text from letter
-        private string GetOptionText(QuestionModel q, string option)
+        // View Quiz Result by Attempt
+        public ActionResult QuizResultByAttempt(Guid attemptId)
         {
-            switch (option)
+            var responses = responseRepo.GetUserResponsesByAttempt(attemptId);
+            if (responses.Count == 0)
+                return Content("No data found for this attempt.");
+
+            var resultDetails = responses.Select(r => new QuizResultDetail
             {
-                case "A": return q.OptionA;
-                case "B": return q.OptionB;
-                case "C": return q.OptionC;
-                case "D": return q.OptionD;
-                default: return "";
-            }
+                QuestionText = r.QuestionText,
+                CorrectAnswer = r.CorrectOption,
+                YourAnswer = r.SelectedOption,
+                IsCorrect = r.IsCorrect
+            }).ToList();
+
+            int totalQuestions = responses.Count;
+            int correctAnswers = responses.Count(r => r.IsCorrect);
+
+            var resultModel = new QuizResultModel
+            {
+                TotalQuestions = totalQuestions,
+                CorrectAnswers = correctAnswers,
+                Score = (totalQuestions > 0) ? (correctAnswers * 100 / totalQuestions) : 0,
+                ResultDetails = resultDetails
+            };
+
+            return View("QuizResult", resultModel);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteAttempt(Guid attemptId)
+        {
+            if (Session["UserId"] == null)
+                return RedirectToAction("Login", "Auth");
+
+            var userId = (Guid)Session["UserId"];
+            responseRepo.DeleteAttempt(attemptId, userId);
+
+            TempData["SuccessMessage"] = "Quiz attempt deleted successfully!";
+            return RedirectToAction("QuizHistory");
+        }
+
     }
 }

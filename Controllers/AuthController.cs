@@ -79,7 +79,7 @@ namespace QuizAppDotNetFramework.Controllers
                 TempData["Success"] = "Registration successful! Please login.";
                 return RedirectToAction("Login");
             }
-            catch (Exception ex)
+            catch (Exception ex) 
             {
                 ViewBag.Error = "Registration failed: " + ex.Message;
                 return View();

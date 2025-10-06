@@ -42,14 +42,14 @@ namespace QuizAppDotNetFramework.Controllers
         {
             var questions = questionRepo.GetQuestionsByQuizId(QuizID);
             var userId = (Guid)Session["UserId"];
-
             Guid attemptId = Guid.NewGuid();
 
+            // 1️⃣ Save each answer to the database
             foreach (var q in questions)
             {
                 string userAnswer = answers["answers[" + q.QuestionId + "]"];
-                if (string.IsNullOrEmpty(userAnswer) || userAnswer == "NA")
-                    userAnswer = "Not Attempted";
+                if (string.IsNullOrEmpty(userAnswer))
+                    userAnswer = "Not Attempted"; // handle unanswered
 
                 bool isCorrect = q.CorrectOption.Equals(userAnswer, StringComparison.OrdinalIgnoreCase);
 
@@ -66,8 +66,48 @@ namespace QuizAppDotNetFramework.Controllers
                 });
             }
 
-            return RedirectToAction("QuizHistory");
+
+            // 2️⃣ Prepare results for QuizResult view
+            int totalQuestions = questions.Count;
+            int correctAnswers = questions.Count(q =>
+            {
+                string ans = answers["answers[" + q.QuestionId + "]"];
+                if (string.IsNullOrEmpty(ans) || ans == "NA") ans = "Not Attempted";
+                return q.CorrectOption.Equals(ans, StringComparison.OrdinalIgnoreCase);
+            });
+            int score = (int)((double)correctAnswers / totalQuestions * 100);
+
+            // 3️⃣ Prepare question-wise details (optional)
+            var resultDetails = questions.Select(q =>
+            {
+                string userAnswer = answers["answers[" + q.QuestionId + "]"];
+                if (string.IsNullOrEmpty(userAnswer) || userAnswer == "NA") userAnswer = "Not Attempted";
+
+                return new QuizResultDetail
+                {
+                    QuestionText = q.QuestionText,
+                    YourAnswer = userAnswer,
+                    CorrectAnswer = q.CorrectOption,
+                    IsCorrect = q.CorrectOption.Equals(userAnswer, StringComparison.OrdinalIgnoreCase)
+                };
+            }).ToList();
+
+            // 4️⃣ Create QuizResultModel for the view
+            var resultModel = new QuizResultModel
+            {
+                TotalQuestions = totalQuestions,
+                CorrectAnswers = correctAnswers,
+                Score = score,
+                ResultDetails = resultDetails
+            };
+
+            // 5️⃣ Pass QuizId for Retake button
+            ViewBag.QuizId = QuizID;
+
+            // 6️⃣ Return the QuizResult view
+            return View("QuizResult", resultModel);
         }
+
 
         // View Quiz History
         public ActionResult QuizHistory()
@@ -89,33 +129,30 @@ namespace QuizAppDotNetFramework.Controllers
         }
 
         // View result for a specific attempt (without correct answers)
-        public ActionResult QuizHistoryResult(Guid attemptId)
-        {
-            var userId = (Guid)Session["UserId"];
-            var responses = responseRepo.GetUserResponsesByAttempt(attemptId);
+        // View result for a specific attempt (without correct answers)
+        //public ActionResult QuizHistoryResult(Guid attemptId)
+        //{
+        //    // ✅ Use responseRepo instead of non-existent userRepo
+        //    var historyResult = responseRepo.GetQuizHistoryResultByAttemptId(attemptId);
+        //    if (historyResult == null)
+        //        return HttpNotFound();
 
-            if (responses == null || responses.Count == 0)
-                return Content("No data found for this attempt.");
+        //    // Map to QuizResultModel
+        //    var resultModel = new QuizResultModel
+        //    {
+        //        TotalQuestions = historyResult.TotalQuestions,
+        //        CorrectAnswers = historyResult.CorrectAnswers,
+        //        Score = historyResult.Score,
+        //        ResultDetails = null // we don’t want to show Q&A in this styled view
+        //    };
 
-            int totalQuestions = responses.Count;
-            int correctAnswers = responses.Count(r => r.IsCorrect);
-            int scorePercent = (totalQuestions > 0) ? (correctAnswers * 100 / totalQuestions) : 0;
+        //    // Store QuizId in ViewBag for Retake button
+        //    ViewBag.QuizId = historyResult.QuizId;
 
-            var resultDetails = responses.Select(r => new QuizHistoryResultDetail
-            {
-                QuestionText = r.QuestionText,
-                YourAnswer = r.SelectedOption
-            }).ToList();
+        //    // Return the styled QuizResult view
+        //    return View("QuizResult", resultModel);
+        //}
 
-            var model = new QuizHistoryResultModel
-            {
-                TotalQuestions = totalQuestions,
-                CorrectAnswers = correctAnswers,
-                ScorePercentage = scorePercent,
-                ResultDetails = resultDetails
-            };
 
-            return View(model);
-        }
     }
 }

@@ -32,11 +32,13 @@
                         <td>@h.Score</td>
                         <td>
                             @Html.ActionLink("View Result", "QuizHistoryResult", "User", new { attemptId = h.AttemptId }, new { @class = "btn btn-sm btn-primary" })
+                            @Html.ActionLink("Retake Quiz", "TakeQuiz", "User", new { quizId = h.QuizId }, new { @class = "btn btn-sm btn-success me-2" })
                             <form action="@Url.Action("DeleteAttempt", "User")" method="post" style="display:inline;">
                                 <input type="hidden" name="attemptId" value="@h.AttemptId" />
                                 <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">Delete</button>
                             </form>
                         </td>
+
                     </tr>
                 }
             </tbody>

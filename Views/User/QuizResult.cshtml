@@ -13,17 +13,38 @@
         <p><strong>Total Questions:</strong> @Model.TotalQuestions</p>
         <p><strong>Correct Answers:</strong> @Model.CorrectAnswers</p>
         <p><strong>Score:</strong> @Model.Score %</p>
+
+        @* Remarks based on score *@
+        <p class="mt-2">
+            @if (Model.Score >= 80)
+            {
+                <span class="text-success">Excellent work! ??</span>
+            }
+            else if (Model.Score >= 50)
+            {
+                <span class="text-warning">Good job! Keep practicing ??</span>
+            }
+            else
+            {
+                <span class="text-danger">Don’t give up! Try again ??</span>
+            }
+        </p>
     </div>
 
     <h3 class="mb-3">Questions and Answers</h3>
 
     @foreach (var detail in Model.ResultDetails)
     {
-        <div class="card mb-3 p-3 shadow-sm @(detail.IsCorrect ? "border-success" : "border-danger")">
+        var borderClass = detail.IsCorrect ? "border-success"
+                          : (detail.YourAnswer == "Not Attempted" ? "border-warning" : "border-danger");
+        var answerColor = detail.IsCorrect ? "green"
+                          : (detail.YourAnswer == "Not Attempted" ? "orange" : "red");
+
+        <div class="card mb-3 p-3 shadow-sm @borderClass">
             <p><strong>Question:</strong> @detail.QuestionText</p>
             <p>
                 <strong>Your Answer:</strong>
-                <span style="color:@(detail.IsCorrect ? "green" : "red")">
+                <span style="color:@answerColor">
                     @GetAnswerText(detail.YourAnswer)
                 </span>
             </p>
@@ -38,7 +59,6 @@
 </div>
 
 @functions {
-    // Helper to extract the actual text from "A: Option Text"
     private string GetAnswerText(string answer)
     {
         if (string.IsNullOrEmpty(answer))

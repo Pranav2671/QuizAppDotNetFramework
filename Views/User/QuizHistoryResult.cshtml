@@ -1,35 +1,56 @@
-@model QuizAppDotNetFramework.Models.QuizHistoryResultModel
+@model QuizAppDotNetFramework.Models.QuizResultModel
 
 @{
-    ViewBag.Title = "Quiz Result (History)";
+    ViewBag.Title = "Quiz Result";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string remark = "";
+    string remarkClass = "";
+
+    if (Model.Score >= 80)
+    {
+        remark = "Excellent work! You really know your stuff ??";
+        remarkClass = "text-success";
+    }
+    else if (Model.Score >= 50)
+    {
+        remark = "Good job! Keep practicing to improve even more ??";
+        remarkClass = "text-warning";
+    }
+    else
+    {
+        remark = "Don’t give up! Review the material and try again ??";
+        remarkClass = "text-danger";
+    }
 }
 
-<div class="container mt-4">
-    <h2 class="mb-3">Quiz Result</h2>
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-4 text-center p-4">
+        <h2 class="text-primary mb-4">Your Quiz Result</h2>
 
-    <div class="alert alert-info">
-        <strong>Score:</strong> @Model.CorrectAnswers / @Model.TotalQuestions
-        (<strong>@Model.ScorePercentage%</strong>)
+        <div class="d-flex justify-content-center mb-4">
+            <div class="rounded-circle border border-3 border-primary d-flex align-items-center justify-content-center"
+                 style="width:120px; height:120px; font-size:28px; font-weight:bold;">
+                @Model.Score%
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <p><strong>Total Questions:</strong> @Model.TotalQuestions</p>
+            <p><strong>Correct Answers:</strong> @Model.CorrectAnswers</p>
+        </div>
+
+        <h4 class="@remarkClass mt-4">@remark</h4>
+
+        <div class="mt-4">
+            <a href="@Url.Action("TakeQuiz", "User", new { quizId = ViewBag.QuizId })"
+               class="btn btn-success btn-lg me-2">
+                Retake Quiz
+            </a>
+            <a href="@Url.Action("QuizHistory", "User")"
+               class="btn btn-outline-secondary btn-lg">
+                Back to History
+            </a>
+        </div>
     </div>
-
-    <table class="table table-bordered">
-        <thead class="table-dark">
-            <tr>
-                <th>Question</th>
-                <th>Your Answer</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var r in Model.ResultDetails)
-            {
-                <tr>
-                    <td>@r.QuestionText</td>
-                    <td>@r.YourAnswer</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-
-    <a href="@Url.Action("QuizHistory", "User")" class="btn btn-primary">Back to Quiz History</a>
 </div>

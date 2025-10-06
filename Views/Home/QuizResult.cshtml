@@ -1,4 +1,5 @@
 @model IEnumerable<QuizAppDotNetFramework.Models.UserResponseModel>
+
 @{
     ViewBag.Title = "Quiz Result";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -25,16 +26,29 @@
             {
                 <tr>
                     <td>@response.QuestionText</td>
-                    <td>@response.SelectedOption</td>
+                    <td>
+                        @if (string.IsNullOrEmpty(response.SelectedOption) || response.SelectedOption == "NA")
+                        {
+                            <span class="badge bg-danger">Not Attempted</span>
+                        }
+                        else
+                        {
+                            @response.SelectedOption
+                        }
+                    </td>
                     <td>@response.CorrectOption</td>
                     <td>
-                        @if (response.IsCorrect)
+                        @if (string.IsNullOrEmpty(response.SelectedOption) || response.SelectedOption == "NA")
+                        {
+                            <span class="badge bg-danger">Not Attempted</span>
+                        }
+                        else if (response.IsCorrect)
                         {
                             <span class="badge bg-success">Correct</span>
                         }
                         else
                         {
-                            <span class="badge bg-danger">Wrong</span>
+                            <span class="badge bg-warning text-dark">Wrong</span>
                         }
                     </td>
                 </tr>
@@ -42,5 +56,5 @@
         </tbody>
     </table>
 
-    <a href="@Url.Action("Index", "Home")" class="btn btn-primary">Back to Quizzes</a>
+    <a href="@Url.Action("Index", "User")" class="btn btn-primary">Back to Quizzes</a>
 </div>

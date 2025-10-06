@@ -131,6 +131,7 @@
     </Compile>
     <Compile Include="Models\OptionModel.cs" />
     <Compile Include="Models\QuestionModel.cs" />
+    <Compile Include="Models\QuizHistoryResultModel.cs" />
     <Compile Include="Models\QuizModel.cs" />
     <Compile Include="Models\QuizResultDetail.cs" />
     <Compile Include="Models\QuizResultModel.cs" />
@@ -214,6 +215,7 @@
     <Content Include="Views\User\TakeQuiz.cshtml" />
     <Content Include="Views\User\QuizResult.cshtml" />
     <Content Include="Views\User\QuizHistory.cshtml" />
+    <Content Include="Views\User\QuizHistoryResult.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

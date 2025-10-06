@@ -1,0 +1,35 @@
+@model QuizAppDotNetFramework.Models.QuizHistoryResultModel
+
+@{
+    ViewBag.Title = "Quiz Result (History)";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3">Quiz Result</h2>
+
+    <div class="alert alert-info">
+        <strong>Score:</strong> @Model.CorrectAnswers / @Model.TotalQuestions
+        (<strong>@Model.ScorePercentage%</strong>)
+    </div>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Question</th>
+                <th>Your Answer</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model.ResultDetails)
+            {
+                <tr>
+                    <td>@r.QuestionText</td>
+                    <td>@r.YourAnswer</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <a href="@Url.Action("QuizHistory", "User")" class="btn btn-primary">Back to Quiz History</a>
+</div>

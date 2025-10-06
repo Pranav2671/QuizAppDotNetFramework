@@ -67,12 +67,13 @@ namespace QuizAppDotNetFramework.Controllers
         }
 
         // GET: Home/QuizResult
-        public ActionResult QuizResult(Guid quizId)
+        public ActionResult QuizResult(Guid attemptId)
         {
             var userId = (Guid)Session["UserId"];
             UserResponseRepository responseRepo = new UserResponseRepository();
 
-            var responses = responseRepo.GetUserResponsesForQuiz(userId, quizId);
+            var responses = responseRepo.GetUserResponsesByAttempt(attemptId);
+
 
             int totalQuestions = responses.Count;
             int correctAnswers = responses.Count(r => r.IsCorrect);

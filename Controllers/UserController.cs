@@ -155,7 +155,13 @@ namespace QuizAppDotNetFramework.Controllers
             Guid userId = Guid.Parse(Session["UserId"].ToString());
             var assignments = assignedQuizRepo.GetAssignedQuizzesByUser(userId);
 
-            return View("AssignedQuizzes", assignments);
+
+            // Sort by AssignedOn descending (latest first)
+            var sortedAssignments = assignments
+                .OrderByDescending(a => a.AssignedOn)
+                .ToList();
+
+            return View("AssignedQuizzes", sortedAssignments);
 
         }
 

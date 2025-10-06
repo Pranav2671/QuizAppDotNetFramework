@@ -1,7 +1,8 @@
-﻿using System;
-using System.Web.Mvc;
+﻿using QuizAppDotNetFramework.Models;
 using QuizAppDotNetFramework.Repository;
-using QuizAppDotNetFramework.Models;
+using System;
+using System.Linq;
+using System.Web.Mvc;
 
 namespace QuizAppDotNetFramework.Controllers
 {
@@ -190,7 +191,11 @@ namespace QuizAppDotNetFramework.Controllers
         public ActionResult ViewAssignedQuizzes()
         {
             var assignments = assignedQuizRepo.GetAllAssignedQuizzes();
-            return View("AssignedQuizzes", assignments);
+            // Sort by AssignedOn descending (latest first)
+            var sortedAssignments = assignments
+                .OrderByDescending(a => a.AssignedOn)
+                .ToList();
+            return View("AssignedQuizzes", sortedAssignments);
         }
 
 

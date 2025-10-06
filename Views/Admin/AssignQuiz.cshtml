@@ -1,0 +1,50 @@
+@{
+    ViewBag.Title = "Assign Quiz";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary">Assign Quiz to User</h2>
+        <div>
+            <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary me-2">
+                Home
+            </a>
+            <a href="@Url.Action("Login", "Auth")" class="btn btn-danger">
+                Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Success message -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+
+    <!-- Assign Quiz Form -->
+    @using (Html.BeginForm("AssignQuiz", "Admin", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Select Quiz</label>
+            @Html.DropDownList("quizId", (SelectList)ViewBag.Quizzes, "Select a quiz", new { @class = "form-select" })
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Select User</label>
+            @Html.DropDownList("userId", (SelectList)ViewBag.Users, "Select a user", new { @class = "form-select" })
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Due Date</label>
+            <input type="date" name="dueDate" class="form-control" required />
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary px-4">Assign Quiz</button>
+        </div>
+    }
+</div>

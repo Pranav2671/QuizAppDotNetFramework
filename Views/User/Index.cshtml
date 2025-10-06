@@ -7,6 +7,14 @@
 
 <div class="container mt-5 d-flex flex-column align-items-center">
     <h2 class="text-center mb-4">Welcome, @Session["Username"]!</h2>
+
+    <!-- View Assigned Quizzes Button -->
+    <div class="mb-4">
+        <a href="@Url.Action("ViewAssignments", "User")" class="btn btn-primary btn-lg px-4">
+            View Assigned Quizzes
+        </a>
+    </div>
+
     <h4 class="text-center mb-4">Available Quizzes</h4>
 
     @if (Model != null && Model.Any())

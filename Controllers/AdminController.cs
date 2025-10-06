@@ -10,6 +10,7 @@ namespace QuizAppDotNetFramework.Controllers
         private readonly QuizRepository quizRepo;
         private readonly QuestionRepository questionRepo;
         private readonly UserRepository userRepo;
+        private readonly AssignedQuizRepository assignedQuizRepo = new AssignedQuizRepository();
 
         public AdminController()
         {
@@ -161,5 +162,44 @@ namespace QuizAppDotNetFramework.Controllers
             questionRepo.DeleteQuestion(id);
             return RedirectToAction("ManageQuestions", new { quizId = quizId });
         }
+
+        //Assingn Quiz
+        // GET: Admin/AssignQuiz
+        // GET: Admin/AssignQuiz
+        public ActionResult AssignQuiz()
+        {
+            var quizzes = quizRepo.GetAllQuizzes();
+            var users = userRepo.GetAllUsers();
+
+            ViewBag.Quizzes = new SelectList(quizzes, "QuizId", "Title");
+            ViewBag.Users = new SelectList(users, "UserId", "Username");
+
+            return View();
+        }
+
+        // POST: Handle form submission
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AssignQuiz(Guid quizId, Guid userId, DateTime dueDate)
+        {
+            assignedQuizRepo.AssignQuiz(quizId, userId, dueDate);
+            TempData["SuccessMessage"] = "Quiz assigned successfully!";
+            return RedirectToAction("AssignQuiz");
+        }
+
+        public ActionResult ViewAssignedQuizzes()
+        {
+            var assignments = assignedQuizRepo.GetAllAssignedQuizzes();
+            return View("AssignedQuizzes", assignments);
+        }
+
+
+
+
+
+
+
     }
+
 }
+

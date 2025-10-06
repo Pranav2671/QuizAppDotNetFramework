@@ -139,6 +139,7 @@
     <Compile Include="Models\UserQuizHistoryModel.cs" />
     <Compile Include="Models\UserResponseModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repository\AssignedQuizRepository.cs" />
     <Compile Include="Repository\AuthRepository.cs" />
     <Compile Include="Repository\QuestionRepository.cs" />
     <Compile Include="Repository\QuizRepository.cs" />
@@ -171,6 +172,7 @@
     <Content Include="Scripts\bootstrap.esm.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Compile Include="Models\AssignedQuizModel.cs" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <None Include="Scripts\jquery-3.7.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
@@ -216,6 +218,10 @@
     <Content Include="Views\User\QuizResult.cshtml" />
     <Content Include="Views\User\QuizHistory.cshtml" />
     <Content Include="Views\User\QuizHistoryResult.cshtml" />
+    <Content Include="Views\Admin\AssignQuiz.cshtml" />
+    <Content Include="Views\User\QuizAssignments.cshtml" />
+    <Content Include="Views\Admin\AssignedQuizzes.cshtml" />
+    <Content Include="Views\User\AssignedQuizzes.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

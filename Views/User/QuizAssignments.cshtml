@@ -1,0 +1,69 @@
+@model List<QuizAppDotNetFramework.Models.AssignedQuizModel>
+
+@{
+    ViewBag.Title = "Your Quiz Assignments";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary text-center mb-4">Your Quiz Assignments</h2>
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <div class="d-flex flex-column align-items-center">
+            @foreach (var assignment in Model)
+            {
+                // Determine remark
+                string remark = "";
+                string remarkClass = "";
+                if (assignment.IsCompleted)
+                {
+                    remark = "Completed ?"; // emoji
+                    remarkClass = "text-success";
+                }
+                else if (assignment.DueDate < DateTime.Now)
+                {
+                    remark = "Overdue ?";
+                    remarkClass = "text-danger";
+                }
+                else
+                {
+                    remark = "Pending ?";
+                    remarkClass = "text-warning";
+                }
+
+                <div class="card mb-3 shadow-sm w-75 border border-secondary p-3">
+                    <h4 class="mb-2 text-center">@assignment.QuizTitle</h4>
+                    <p class="text-center mb-1"><strong>Assigned On:</strong> @assignment.AssignedOn.ToString("dd-MM-yyyy")</p>
+                    <p class="text-center mb-1"><strong>Due Date:</strong> @assignment.DueDate.ToString("dd-MM-yyyy")</p>
+                    <h5 class="text-center @remarkClass">@remark</h5>
+
+                    @if (!assignment.IsCompleted && assignment.DueDate >= DateTime.Now)
+                    {
+                        <div class="text-center mt-2">
+                            <a href="@Url.Action("TakeQuiz", "User", new { quizId = assignment.QuizId })" class="btn btn-success">
+                                Attempt Quiz
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">You have no quiz assignments at the moment.</div>
+    }
+</div>
+
+@section styles {
+    <style>
+        .card {
+            border-radius: 12px;
+        }
+
+        h2, h4, h5 {
+            font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+        }
+    </style>
+}

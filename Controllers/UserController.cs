@@ -12,6 +12,8 @@ namespace QuizAppDotNetFramework.Controllers
         private readonly QuizRepository quizRepo = new QuizRepository();
         private readonly QuestionRepository questionRepo = new QuestionRepository();
         private readonly UserResponseRepository responseRepo = new UserResponseRepository();
+        private readonly AssignedQuizRepository assignedQuizRepo = new AssignedQuizRepository();
+
 
         // Dashboard - list quizzes
         public ActionResult Index()
@@ -66,8 +68,7 @@ namespace QuizAppDotNetFramework.Controllers
                 });
             }
 
-
-            // 2️⃣ Prepare results for QuizResult view
+            // 2️⃣ Calculate total score
             int totalQuestions = questions.Count;
             int correctAnswers = questions.Count(q =>
             {
@@ -77,7 +78,10 @@ namespace QuizAppDotNetFramework.Controllers
             });
             int score = (int)((double)correctAnswers / totalQuestions * 100);
 
-            // 3️⃣ Prepare question-wise details (optional)
+            // 3️⃣ Update assignment if this quiz is assigned
+            assignedQuizRepo.UpdateAssignmentAfterAttempt(userId, QuizID, attemptId, score);
+
+            // 4️⃣ Prepare question-wise details
             var resultDetails = questions.Select(q =>
             {
                 string userAnswer = answers["answers[" + q.QuestionId + "]"];
@@ -92,7 +96,7 @@ namespace QuizAppDotNetFramework.Controllers
                 };
             }).ToList();
 
-            // 4️⃣ Create QuizResultModel for the view
+            // 5️⃣ Create QuizResultModel for the view
             var resultModel = new QuizResultModel
             {
                 TotalQuestions = totalQuestions,
@@ -101,12 +105,12 @@ namespace QuizAppDotNetFramework.Controllers
                 ResultDetails = resultDetails
             };
 
-            // 5️⃣ Pass QuizId for Retake button
+            // 6️⃣ Pass QuizId for Retake button
             ViewBag.QuizId = QuizID;
 
-            // 6️⃣ Return the QuizResult view
             return View("QuizResult", resultModel);
         }
+
 
 
         // View Quiz History
@@ -131,7 +135,29 @@ namespace QuizAppDotNetFramework.Controllers
             return RedirectToAction("QuizHistory");
         }
 
+        public ActionResult QuizAssignments()
+        {
+            var userId = (Guid)Session["UserId"];
+            var assignments = assignedQuizRepo.GetAssignedQuizzesByUser(userId);
+            return View(assignments);
+        }
 
+        //View Assignment
+        [HttpGet]
+        public ActionResult ViewAssignments()
+        {
+            // Ensure user is logged in
+            if (Session["UserId"] == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            Guid userId = Guid.Parse(Session["UserId"].ToString());
+            var assignments = assignedQuizRepo.GetAssignedQuizzesByUser(userId);
+
+            return View("AssignedQuizzes", assignments);
+
+        }
 
         // View result for a specific attempt (without correct answers)
         // View result for a specific attempt (without correct answers)

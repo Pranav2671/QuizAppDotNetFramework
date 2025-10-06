@@ -18,6 +18,7 @@
 
     <!-- Navigation cards -->
     <div class="row">
+        <!-- Manage Quizzes -->
         <div class="col-md-4 mb-3">
             <div class="card shadow-sm text-center h-100">
                 <div class="card-body d-flex flex-column justify-content-center">
@@ -28,17 +29,29 @@
             </div>
         </div>
 
-        @* Uncomment this if you want Manage Questions card back *@
-        @*<div class="col-md-4 mb-3">
-                <div class="card shadow-sm text-center h-100">
-                    <div class="card-body d-flex flex-column justify-content-center">
-                        <h5 class="card-title">Manage Questions</h5>
-                        <p class="card-text text-muted">Add or edit quiz questions</p>
-                        <a href="@Url.Action("ManageQuestions", "Admin", new { quizId = Guid.Empty })" class="btn btn-success mt-2">Go</a>
-                    </div>
+        <!-- Assign Quiz -->
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm text-center h-100">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <h5 class="card-title">Assign Quiz</h5>
+                    <p class="card-text text-muted">Assign quizzes to users with due dates</p>
+                    <a href="@Url.Action("AssignQuiz", "Admin")" class="btn btn-success mt-2">Go</a>
                 </div>
-            </div>*@
+            </div>
+        </div>
 
+        <!-- View Assigned Quizzes -->
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm text-center h-100">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <h5 class="card-title">View Assigned Quizzes</h5>
+                    <p class="card-text text-muted">See all assigned quizzes and their status</p>
+                    <a href="@Url.Action("ViewAssignedQuizzes", "Admin")" class="btn btn-info mt-2">Go</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manage Users -->
         <div class="col-md-4 mb-3">
             <div class="card shadow-sm text-center h-100">
                 <div class="card-body d-flex flex-column justify-content-center">

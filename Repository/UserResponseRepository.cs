@@ -95,18 +95,20 @@ namespace QuizAppDotNetFramework.Repository
         }
 
         // Delete an attempt
-        public void DeleteAttempt(Guid attemptId)
+        public void DeleteAttempt(Guid attemptId, Guid userId)
         {
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (var conn = new SqlConnection(connectionString))
+            using (var cmd = new SqlCommand("sp_DeleteUserResponsesByAttempt", conn))
             {
-                SqlCommand cmd = new SqlCommand("sp_DeleteUserAttempt", con);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@AttemptId", attemptId);
-
-                con.Open();
+                cmd.Parameters.AddWithValue("@UserId", userId); // Pass the required UserId
+                conn.Open();
                 cmd.ExecuteNonQuery();
             }
         }
+
+
 
 
     }

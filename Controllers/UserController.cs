@@ -124,9 +124,14 @@ namespace QuizAppDotNetFramework.Controllers
         [HttpPost]
         public ActionResult DeleteAttempt(Guid attemptId)
         {
-            responseRepo.DeleteAttempt(attemptId);
+            var userId = (Guid)Session["UserId"];
+            responseRepo.DeleteAttempt(attemptId, userId);
+
+            TempData["SuccessMessage"] = "Quiz attempt deleted successfully!";
             return RedirectToAction("QuizHistory");
         }
+
+
 
         // View result for a specific attempt (without correct answers)
         // View result for a specific attempt (without correct answers)

@@ -11,13 +11,14 @@ namespace QuizAppDotNetFramework.Controllers
         private readonly QuizRepository quizRepo;
         private readonly QuestionRepository questionRepo;
         private readonly UserRepository userRepo;
-        private readonly AssignedQuizRepository assignedQuizRepo = new AssignedQuizRepository();
+        private readonly AssignedQuizRepository assignedQuizRepo;
 
         public AdminController()
         {
             quizRepo = new QuizRepository();
             questionRepo = new QuestionRepository();
-            userRepo = new UserRepository(); // <-- fixed null reference
+            userRepo = new UserRepository();
+            assignedQuizRepo = new AssignedQuizRepository();
         }
 
         // ----------------- ADMIN DASHBOARD -----------------
@@ -30,7 +31,7 @@ namespace QuizAppDotNetFramework.Controllers
         [HttpGet]
         public ActionResult ManageUsers()
         {
-            var users = userRepo.GetAllUsers(); // now properly initialized
+            var users = userRepo.GetAllUsers();
             return View(users);
         }
 
@@ -46,7 +47,6 @@ namespace QuizAppDotNetFramework.Controllers
             {
                 TempData["Error"] = "Failed to delete user: " + ex.Message;
             }
-
             return RedirectToAction("ManageUsers");
         }
 
@@ -57,13 +57,8 @@ namespace QuizAppDotNetFramework.Controllers
             return View(quizzes);
         }
 
-        // GET: Admin/AddQuiz
-        public ActionResult AddQuiz()
-        {
-            return View();
-        }
+        public ActionResult AddQuiz() => View();
 
-        // POST: Admin/AddQuiz
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult AddQuiz(QuizModel quiz)
@@ -73,18 +68,15 @@ namespace QuizAppDotNetFramework.Controllers
                 quiz.QuizId = Guid.NewGuid();
                 quiz.CreatedDate = DateTime.Now;
 
-                // Get current logged-in admin details from session
                 var userId = (Guid)Session["UserId"];
                 var username = (string)Session["Username"];
 
                 quiz.CreatedBy = userId;
                 quiz.CreatedByUsername = username;
 
-                quizRepo.AddQuiz(quiz); // use already initialized repo
-
+                quizRepo.AddQuiz(quiz);
                 return RedirectToAction("ManageQuizzes");
             }
-
             return View(quiz);
         }
 
@@ -93,14 +85,13 @@ namespace QuizAppDotNetFramework.Controllers
         {
             try
             {
-                quizRepo.DeleteQuiz(id); // use already initialized repo
+                quizRepo.DeleteQuiz(id);
                 TempData["Success"] = "Quiz deleted successfully!";
             }
             catch (Exception ex)
             {
                 TempData["Error"] = "Failed to delete quiz: " + ex.Message;
             }
-
             return RedirectToAction("ManageQuizzes");
         }
 
@@ -113,11 +104,7 @@ namespace QuizAppDotNetFramework.Controllers
         }
 
         [HttpGet]
-        public ActionResult AddQuestion(Guid quizId)
-        {
-            var model = new QuestionModel { QuizId = quizId };
-            return View(model);
-        }
+        public ActionResult AddQuestion(Guid quizId) => View(new QuestionModel { QuizId = quizId });
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -128,30 +115,25 @@ namespace QuizAppDotNetFramework.Controllers
                 questionRepo.AddQuestion(model);
                 return RedirectToAction("ManageQuestions", new { quizId = model.QuizId });
             }
-
             return View(model);
         }
 
-        // GET: Admin/EditQuestion
         [HttpGet]
         public ActionResult EditQuestion(Guid id, Guid quizId)
         {
-            var question = questionRepo.GetQuestionById(id); // we will create this method in repo
-            if (question == null)
-                return HttpNotFound();
-
-            question.QuizId = quizId; // keep the quizId for redirect
+            var question = questionRepo.GetQuestionById(id);
+            if (question == null) return HttpNotFound();
+            question.QuizId = quizId;
             return View(question);
         }
 
-        // POST: Admin/EditQuestion
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult EditQuestion(QuestionModel model)
         {
             if (ModelState.IsValid)
             {
-                questionRepo.UpdateQuestion(model); // we will create this method in repo
+                questionRepo.UpdateQuestion(model);
                 return RedirectToAction("ManageQuestions", new { quizId = model.QuizId });
             }
             return View(model);
@@ -161,24 +143,18 @@ namespace QuizAppDotNetFramework.Controllers
         public ActionResult DeleteQuestion(Guid id, Guid quizId)
         {
             questionRepo.DeleteQuestion(id);
-            return RedirectToAction("ManageQuestions", new { quizId = quizId });
+            return RedirectToAction("ManageQuestions", new { quizId });
         }
 
-        //Assingn Quiz
-        // GET: Admin/AssignQuiz
-        // GET: Admin/AssignQuiz
+        // ----------------- ASSIGN QUIZZES -----------------
+        [HttpGet]
         public ActionResult AssignQuiz()
         {
-            var quizzes = quizRepo.GetAllQuizzes();
-            var users = userRepo.GetAllUsers();
-
-            ViewBag.Quizzes = new SelectList(quizzes, "QuizId", "Title");
-            ViewBag.Users = new SelectList(users, "UserId", "Username");
-
+            ViewBag.Quizzes = new SelectList(quizRepo.GetAllQuizzes(), "QuizId", "Title");
+            ViewBag.Users = new SelectList(userRepo.GetAllUsers(), "UserId", "Username");
             return View();
         }
 
-        // POST: Handle form submission
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult AssignQuiz(Guid quizId, Guid userId, DateTime dueDate)
@@ -188,23 +164,53 @@ namespace QuizAppDotNetFramework.Controllers
             return RedirectToAction("AssignQuiz");
         }
 
+        [HttpGet]
         public ActionResult ViewAssignedQuizzes()
         {
-            var assignments = assignedQuizRepo.GetAllAssignedQuizzes();
-            // Sort by AssignedOn descending (latest first)
-            var sortedAssignments = assignments
-                .OrderByDescending(a => a.AssignedOn)
-                .ToList();
-            return View("AssignedQuizzes", sortedAssignments);
+            var assignments = assignedQuizRepo.GetAllAssignedQuizzesWithScore()
+                                .OrderByDescending(a => a.AssignedOn) // latest first
+                                .ToList();
+            return View("AssignedQuizzes", assignments);
         }
 
+        // Edit Assignment
+        // GET: Edit Assignment
+        public ActionResult EditAssignment(Guid id)
+        {
+            var assignment = assignedQuizRepo.GetAssignmentById(id);
+            if (assignment == null) return HttpNotFound();
+            return View(assignment);
+        }
 
+        // POST: Edit Assignment
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditAssignment(AssignedQuizModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                bool updated = assignedQuizRepo.UpdateAssignment(model);
+                if (updated)
+                {
+                    TempData["SuccessMessage"] = "Assignment updated successfully!";
+                    return RedirectToAction("ViewAssignedQuizzes");
+                }
+                ModelState.AddModelError("", "Failed to update assignment. Please try again.");
+            }
+            return View(model);
+        }
+        // Delete Assignment
+        public ActionResult DeleteAssignment(Guid id)
+        {
+            var assignment = assignedQuizRepo.GetAssignmentById(id);
+            if (assignment == null) return HttpNotFound();
 
+            bool deleted = assignedQuizRepo.DeleteAssignment(id);
+            TempData[deleted ? "SuccessMessage" : "ErrorMessage"] =
+                deleted ? "Assignment deleted successfully!" : "Failed to delete assignment.";
 
-
-
+            return RedirectToAction("ViewAssignedQuizzes");
+        } 
 
     }
-
 }
-

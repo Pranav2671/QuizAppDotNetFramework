@@ -149,7 +149,7 @@ namespace QuizAppDotNetFramework.Repository
             }
         }
 
-            public void UpdateAssignmentAfterAttempt(Guid userId, Guid quizId, Guid attemptId, int score)
+        public void UpdateAssignmentAfterAttempt(Guid userId, Guid quizId, Guid attemptId, int score)
         {
             using (SqlConnection con = new SqlConnection(connectionString))
             {
@@ -166,6 +166,77 @@ namespace QuizAppDotNetFramework.Repository
                 }
             }
         }
+
+        //Update Assignment by Admin
+        public bool UpdateAssignment(AssignedQuizModel model)
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand("sp_UpdateAssignment", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@AssignmentId", model.AssignmentId);
+                    cmd.Parameters.AddWithValue("@QuizId", model.QuizId);
+                    cmd.Parameters.AddWithValue("@UserId", model.UserId);
+                    cmd.Parameters.AddWithValue("@DueDate", model.DueDate);
+                    con.Open();
+                    int rows = cmd.ExecuteNonQuery();
+                    return rows > 0;
+                }
+            }
+
+        }
+        // Delete assignment
+        public bool DeleteAssignment(Guid id)
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand("sp_DeleteAssignment", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@AssignmentId", id);
+                    con.Open();
+                    int rows = cmd.ExecuteNonQuery();
+                    return rows > 0;
+                }
+            }
+        }
+
+        // Get a single assignment by AssignmentId
+        public AssignedQuizModel GetAssignmentById(Guid assignmentId)
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand("sp_GetAssignmentById", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@AssignmentId", assignmentId);
+                    con.Open();
+
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            return new AssignedQuizModel
+                            {
+                                AssignmentId = (Guid)dr["AssignmentId"],
+                                QuizId = (Guid)dr["QuizId"],
+                                UserId = (Guid)dr["UserId"],
+                                Username = dr["Username"].ToString(),
+                                QuizTitle = dr["QuizTitle"].ToString(),
+                                AssignedOn = (DateTime)dr["AssignedOn"],
+                                DueDate = (DateTime)dr["DueDate"],
+                                IsCompleted = (bool)dr["IsCompleted"],
+                                Score = dr["Score"] != DBNull.Value ? (int)dr["Score"] : 0,
+                                AttemptId = dr["AttemptId"] != DBNull.Value ? (Guid?)dr["AttemptId"] : null
+                            };
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
 
 
     }

@@ -1,0 +1,32 @@
+@model QuizAppDotNetFramework.Models.AssignedQuizModel
+
+@{
+    ViewBag.Title = "Edit Assignment";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Edit Assignment</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.AssignmentId)
+
+    <div class="form-group mb-2">
+        @Html.LabelFor(m => m.QuizTitle)
+        @Html.TextBoxFor(m => m.QuizTitle, new { @class = "form-control", @readonly = "readonly" })
+    </div>
+
+    <div class="form-group mb-2">
+        @Html.LabelFor(m => m.Username)
+        @Html.TextBoxFor(m => m.Username, new { @class = "form-control", @readonly = "readonly" })
+    </div>
+
+    <div class="form-group mb-2">
+        @Html.LabelFor(m => m.DueDate)
+        @Html.TextBoxFor(m => m.DueDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a href="@Url.Action("ViewAssignedQuizzes")" class="btn btn-secondary">Cancel</a>
+}

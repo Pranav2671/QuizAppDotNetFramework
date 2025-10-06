@@ -175,30 +175,44 @@ namespace QuizAppDotNetFramework.Controllers
 
         // Edit Assignment
         // GET: Edit Assignment
+        [HttpGet]
         public ActionResult EditAssignment(Guid id)
         {
             var assignment = assignedQuizRepo.GetAssignmentById(id);
-            if (assignment == null) return HttpNotFound();
+            if (assignment == null)
+                return HttpNotFound();
+
+            // Load dropdown data
+            var users = new UserRepository().GetAllUsers();
+            var quizzes = new QuizRepository().GetAllQuizzes();
+
+            ViewBag.Users = new SelectList(users, "UserId", "UserName", assignment.UserId);
+            ViewBag.Quizzes = new SelectList(quizzes, "QuizId", "Title", assignment.QuizId);
+
             return View(assignment);
         }
 
-        // POST: Edit Assignment
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult EditAssignment(AssignedQuizModel model)
         {
             if (ModelState.IsValid)
             {
-                bool updated = assignedQuizRepo.UpdateAssignment(model);
-                if (updated)
-                {
-                    TempData["SuccessMessage"] = "Assignment updated successfully!";
+                bool success = assignedQuizRepo.UpdateAssignment(model);
+                if (success)
                     return RedirectToAction("ViewAssignedQuizzes");
-                }
-                ModelState.AddModelError("", "Failed to update assignment. Please try again.");
             }
+
+            // Reload dropdowns in case of validation error
+            var users = new UserRepository().GetAllUsers();
+            var quizzes = new QuizRepository().GetAllQuizzes();
+
+            ViewBag.Users = new SelectList(users, "UserId", "UserName", model.UserId);
+            ViewBag.Quizzes = new SelectList(quizzes, "QuizId", "Title", model.QuizId);
+
             return View(model);
         }
+
         // Delete Assignment
         public ActionResult DeleteAssignment(Guid id)
         {

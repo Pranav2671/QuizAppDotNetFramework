@@ -1,32 +1,33 @@
 @model QuizAppDotNetFramework.Models.AssignedQuizModel
-
 @{
     ViewBag.Title = "Edit Assignment";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Edit Assignment</h2>
+<div class="container mt-4">
+    <h2 class="text-primary mb-4">Edit Assignment</h2>
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
-    @Html.HiddenFor(m => m.AssignmentId)
+    @using (Html.BeginForm("EditAssignment", "Admin", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.AssignmentId)
 
-    <div class="form-group mb-2">
-        @Html.LabelFor(m => m.QuizTitle)
-        @Html.TextBoxFor(m => m.QuizTitle, new { @class = "form-control", @readonly = "readonly" })
-    </div>
+        <div class="form-group mb-3">
+            <label>User</label>
+            @Html.DropDownListFor(m => m.UserId, (SelectList)ViewBag.Users, "Select User", new { @class = "form-control" })
+        </div>
 
-    <div class="form-group mb-2">
-        @Html.LabelFor(m => m.Username)
-        @Html.TextBoxFor(m => m.Username, new { @class = "form-control", @readonly = "readonly" })
-    </div>
+        <div class="form-group mb-3">
+            <label>Quiz (Category)</label>
+            @Html.DropDownListFor(m => m.QuizId, (SelectList)ViewBag.Quizzes, "Select Quiz", new { @class = "form-control" })
+        </div>
 
-    <div class="form-group mb-2">
-        @Html.LabelFor(m => m.DueDate)
-        @Html.TextBoxFor(m => m.DueDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
-    </div>
+        <div class="form-group mb-3">
+            <label>Due Date</label>
+            @Html.TextBoxFor(m => m.DueDate, "{0:yyyy-MM-dd}", new { type = "date", @class = "form-control" })
+        </div>
 
-    <button type="submit" class="btn btn-primary">Save Changes</button>
-    <a href="@Url.Action("ViewAssignedQuizzes")" class="btn btn-secondary">Cancel</a>
-}
+        <button type="submit" class="btn btn-success">Save Changes</button>
+        <a href="@Url.Action("ViewAssignedQuizzes", "Admin")" class="btn btn-secondary ms-2">Cancel</a>
+    }
+</div>

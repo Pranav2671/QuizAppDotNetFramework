@@ -237,6 +237,44 @@ namespace QuizAppDotNetFramework.Repository
             return null;
         }
 
+        public bool AssignmentExists(Guid userId, Guid quizId)
+        {
+            using (var conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_CheckAssignmentExists", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.Parameters.AddWithValue("@QuizId", quizId);
+
+                    int count = (int)cmd.ExecuteScalar();
+                    return count > 0;
+                }
+            }
+        }
+
+        public void AddAssignment(AssignedQuizModel assignment)
+        {
+            using (var conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_AddAssignment", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@AssignmentId", assignment.AssignmentId);
+                    cmd.Parameters.AddWithValue("@UserId", assignment.UserId);
+                    cmd.Parameters.AddWithValue("@QuizId", assignment.QuizId);
+                    cmd.Parameters.AddWithValue("@AssignedOn", assignment.AssignedOn);
+                    cmd.Parameters.AddWithValue("@DueDate", assignment.DueDate);
+                    cmd.Parameters.AddWithValue("@IsCompleted", assignment.IsCompleted);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+
 
 
     }

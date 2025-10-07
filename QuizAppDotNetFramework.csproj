@@ -129,6 +129,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\AssignQuizViewModel.cs" />
     <Compile Include="Models\OptionModel.cs" />
     <Compile Include="Models\QuestionModel.cs" />
     <Compile Include="Models\QuizHistoryResultModel.cs" />
@@ -223,6 +224,7 @@
     <Content Include="Views\Admin\AssignedQuizzes.cshtml" />
     <Content Include="Views\User\AssignedQuizzes.cshtml" />
     <Content Include="Views\Admin\EditAssignment.cshtml" />
+    <Content Include="Views\Admin\AssignMultipleQuizzes.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

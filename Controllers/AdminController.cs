@@ -150,31 +150,70 @@ namespace QuizAppDotNetFramework.Controllers
         [HttpGet]
         public ActionResult AssignQuiz()
         {
-            ViewBag.Quizzes = new SelectList(quizRepo.GetAllQuizzes(), "QuizId", "Title");
+            // Single user dropdown
             ViewBag.Users = new SelectList(userRepo.GetAllUsers(), "UserId", "Username");
-            return View();
+
+            // Build ViewModel for multi-quiz selection
+            var model = new AssignQuizViewModel
+            {
+                Users = userRepo.GetAllUsers(),
+                Quizzes = quizRepo.GetAllQuizzes()
+            };
+
+            return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult AssignQuiz(Guid quizId, Guid userId, DateTime dueDate)
+        public ActionResult AssignQuiz(AssignQuizViewModel model)
         {
-            assignedQuizRepo.AssignQuiz(quizId, userId, dueDate);
-            TempData["SuccessMessage"] = "Quiz assigned successfully!";
+            if (model.SelectedUserId == Guid.Empty || model.SelectedQuizIds == null || !model.SelectedQuizIds.Any())
+            {
+                TempData["Error"] = "Please select a user and at least one quiz.";
+                return RedirectToAction("AssignQuiz");
+            }
+
+            try
+            {
+                foreach (var quizId in model.SelectedQuizIds)
+                {
+                    // Avoid duplicate assignments
+                    if (!assignedQuizRepo.AssignmentExists(model.SelectedUserId, quizId))
+                    {
+                        assignedQuizRepo.AddAssignment(new AssignedQuizModel
+                        {
+                            AssignmentId = Guid.NewGuid(),
+                            UserId = model.SelectedUserId,
+                            QuizId = quizId,
+                            AssignedOn = DateTime.Now,
+                            DueDate = model.DueDate,
+                            IsCompleted = false
+                        });
+                    }
+                }
+
+                TempData["Success"] = "Quizzes assigned successfully!";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error assigning quizzes: " + ex.Message;
+            }
+
             return RedirectToAction("AssignQuiz");
         }
+
+
+
 
         [HttpGet]
         public ActionResult ViewAssignedQuizzes()
         {
             var assignments = assignedQuizRepo.GetAllAssignedQuizzesWithScore()
-                                .OrderByDescending(a => a.AssignedOn) // latest first
+                                .OrderByDescending(a => a.AssignedOn)
                                 .ToList();
             return View("AssignedQuizzes", assignments);
         }
 
-        // Edit Assignment
-        // GET: Edit Assignment
         [HttpGet]
         public ActionResult EditAssignment(Guid id)
         {
@@ -182,15 +221,16 @@ namespace QuizAppDotNetFramework.Controllers
             if (assignment == null)
                 return HttpNotFound();
 
-            // Load dropdown data
-            var users = new UserRepository().GetAllUsers();
-            var quizzes = new QuizRepository().GetAllQuizzes();
+            // Load dropdown data using actual model properties
+            var users = userRepo.GetAllUsers();
+            var quizzes = quizRepo.GetAllQuizzes();
 
-            ViewBag.Users = new SelectList(users, "UserId", "UserName", assignment.UserId);
+            ViewBag.Users = new SelectList(users, "UserId", "Username", assignment.UserId);
             ViewBag.Quizzes = new SelectList(quizzes, "QuizId", "Title", assignment.QuizId);
 
             return View(assignment);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -200,20 +240,27 @@ namespace QuizAppDotNetFramework.Controllers
             {
                 bool success = assignedQuizRepo.UpdateAssignment(model);
                 if (success)
+                {
+                    TempData["Success"] = "Assignment updated successfully!";
                     return RedirectToAction("ViewAssignedQuizzes");
+                }
+                else
+                {
+                    TempData["Error"] = "Failed to update assignment.";
+                }
             }
 
             // Reload dropdowns in case of validation error
-            var users = new UserRepository().GetAllUsers();
-            var quizzes = new QuizRepository().GetAllQuizzes();
+            var users = userRepo.GetAllUsers();
+            var quizzes = quizRepo.GetAllQuizzes();
 
-            ViewBag.Users = new SelectList(users, "UserId", "UserName", model.UserId);
+            ViewBag.Users = new SelectList(users, "UserId", "Username", model.UserId);
             ViewBag.Quizzes = new SelectList(quizzes, "QuizId", "Title", model.QuizId);
 
             return View(model);
         }
 
-        // Delete Assignment
+
         public ActionResult DeleteAssignment(Guid id)
         {
             var assignment = assignedQuizRepo.GetAssignmentById(id);
@@ -224,7 +271,6 @@ namespace QuizAppDotNetFramework.Controllers
                 deleted ? "Assignment deleted successfully!" : "Failed to delete assignment.";
 
             return RedirectToAction("ViewAssignedQuizzes");
-        } 
-
+        }
     }
 }

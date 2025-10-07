@@ -1,0 +1,68 @@
+@model QuizAppDotNetFramework.Models.AssignQuizViewModel
+
+@{
+    ViewBag.Title = "Assign Quizzes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="text-primary mb-4">Assign Quizzes</h2>
+
+    <!-- Success/Error messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+
+    @using (Html.BeginForm("AssignMultipleQuizzes", "Admin", FormMethod.Post))
+    {
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Users</h5>
+                <div class="list-group mb-3">
+                    @foreach (var user in Model.Users)
+                    {
+                        <div class="list-group-item">
+                            <label>
+                                <input type="checkbox" name="SelectedUserIds" value="@user.UserId" />
+                                @* Replace 'Name' with the actual property in your UserModel *@
+                                @user.UserName
+                            </label>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <h5>Quizzes</h5>
+                <div class="list-group mb-3">
+                    @foreach (var quiz in Model.Quizzes)
+                    {
+                        <div class="list-group-item">
+                            <label>
+                                <input type="checkbox" name="SelectedQuizIds" value="@quiz.QuizId" />
+                                @* Replace 'Title' with the actual property in your QuizModel *@
+                                @quiz.Title
+                            </label>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="DueDate" class="form-label">Due Date:</label>
+            <input type="date" class="form-control" id="DueDate" name="DueDate" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Assign Selected Quizzes</button>
+    }
+</div>

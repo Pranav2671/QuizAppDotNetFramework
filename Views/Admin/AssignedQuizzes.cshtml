@@ -1,5 +1,4 @@
-@using QuizAppDotNetFramework.Models
-@model List<AssignedQuizModel>
+@model List<QuizAppDotNetFramework.Models.AssignedQuizModel>
 
 @{
     ViewBag.Title = "Assigned Quizzes";
@@ -14,36 +13,41 @@
 
     @if (Model != null && Model.Any())
     {
-        <div class="list-group">
-            @foreach (var assignment in Model)
-            {
-                <div class="list-group-item mb-3 shadow-sm">
-                    <h5 class="text-primary">@assignment.QuizTitle</h5>
-                    <p><strong>User:</strong> @assignment.Username</p>
-                    <p><strong>Assigned On:</strong> @assignment.AssignedOn.ToString("dd MMM yyyy")</p>
-                    <p><strong>Due Date:</strong> @assignment.DueDate.ToString("dd MMM yyyy")</p>
-                    <p><strong>Status:</strong> @(assignment.IsCompleted ? "Completed" : "Pending")</p>
+        var groupedByUser = Model.GroupBy(a => new { a.UserId, a.Username }).ToList();
 
-                    @if (assignment.IsCompleted)
+        foreach (var userGroup in groupedByUser)
+        {
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">@userGroup.Key.Username</h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var assignment in userGroup)
                     {
-                        <p class="text-success fw-bold mt-2">Completed</p>
-                    }
-                    else
-                    {
-                        <div class="mt-2 d-flex gap-2">
-                            <a href="@Url.Action("EditAssignment", "Admin", new { id = assignment.AssignmentId })"
-                               class="btn btn-warning btn-sm">Edit</a>
+                        <div class="mb-2 p-2 border rounded">
+                            <strong>Quiz:</strong> @assignment.QuizTitle <br />
+                            <strong>Assigned On:</strong> @assignment.AssignedOn.ToString("dd MMM yyyy") <br />
+                            <strong>Due Date:</strong> @assignment.DueDate.ToString("dd MMM yyyy") <br />
+                            <strong>Status:</strong> @(assignment.IsCompleted ? "Completed" : "Pending") <br />
 
-                            <a href="@Url.Action("DeleteAssignment", "Admin", new { id = assignment.AssignmentId })"
-                               class="btn btn-danger btn-sm"
-                               onclick="return confirm('Are you sure you want to delete this assignment?');">
-                                Delete
-                            </a>
+                            @if (!assignment.IsCompleted)
+                            {
+                                <div class="mt-2 d-flex gap-2">
+                                    <a href="@Url.Action("EditAssignment", "Admin", new { id = assignment.AssignmentId })"
+                                       class="btn btn-warning btn-sm">Edit</a>
+
+                                    <a href="@Url.Action("DeleteAssignment", "Admin", new { id = assignment.AssignmentId })"
+                                       class="btn btn-danger btn-sm"
+                                       onclick="return confirm('Are you sure you want to delete this assignment?');">
+                                        Delete
+                                    </a>
+                                </div>
+                            }
                         </div>
                     }
                 </div>
-            }
-        </div>
+            </div>
+        }
     }
     else
     {

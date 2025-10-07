@@ -84,17 +84,34 @@ namespace QuizAppDotNetFramework.Controllers
             // 4️⃣ Prepare question-wise details
             var resultDetails = questions.Select(q =>
             {
-                string userAnswer = answers["answers[" + q.QuestionId + "]"];
-                if (string.IsNullOrEmpty(userAnswer) || userAnswer == "NA") userAnswer = "Not Attempted";
+                string userAnswerLetter = answers["answers[" + q.QuestionId + "]"];
+                if (string.IsNullOrEmpty(userAnswerLetter) || userAnswerLetter == "NA")
+                    userAnswerLetter = "Not Attempted";
+
+                string userAnswerText = "Not Attempted";
+                if (userAnswerLetter == "A") userAnswerText = q.OptionA;
+                else if (userAnswerLetter == "B") userAnswerText = q.OptionB;
+                else if (userAnswerLetter == "C") userAnswerText = q.OptionC;
+                else if (userAnswerLetter == "D") userAnswerText = q.OptionD;
+                else userAnswerText = userAnswerLetter;
+
+                string correctAnswerText = "";
+                if (q.CorrectOption == "A") correctAnswerText = q.OptionA;
+                else if (q.CorrectOption == "B") correctAnswerText = q.OptionB;
+                else if (q.CorrectOption == "C") correctAnswerText = q.OptionC;
+                else if (q.CorrectOption == "D") correctAnswerText = q.OptionD;
+                else correctAnswerText = q.CorrectOption;
 
                 return new QuizResultDetail
                 {
                     QuestionText = q.QuestionText,
-                    YourAnswer = userAnswer,
-                    CorrectAnswer = q.CorrectOption,
-                    IsCorrect = q.CorrectOption.Equals(userAnswer, StringComparison.OrdinalIgnoreCase)
+                    YourAnswer = userAnswerText,
+                    CorrectAnswer = correctAnswerText,
+                    IsCorrect = q.CorrectOption.Equals(userAnswerLetter, StringComparison.OrdinalIgnoreCase)
                 };
             }).ToList();
+
+
 
             // 5️⃣ Create QuizResultModel for the view
             var resultModel = new QuizResultModel

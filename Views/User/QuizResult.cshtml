@@ -18,15 +18,15 @@
         <p class="mt-2">
             @if (Model.Score >= 80)
             {
-                <span class="text-success">Excellent work! ??</span>
+                <span class="text-success">Excellent work!</span>
             }
             else if (Model.Score >= 50)
             {
-                <span class="text-warning">Good job! Keep practicing ??</span>
+                <span class="text-warning">Good job! Keep practicing.</span>
             }
             else
             {
-                <span class="text-danger">Don’t give up! Try again ??</span>
+                <span class="text-danger">Don’t give up! Try again.</span>
             }
         </p>
     </div>
@@ -45,13 +45,13 @@
             <p>
                 <strong>Your Answer:</strong>
                 <span style="color:@answerColor">
-                    @GetAnswerText(detail.YourAnswer)
+                    @GetOptionText(detail, detail.YourAnswer)
                 </span>
             </p>
             <p>
                 <strong>Correct Answer:</strong>
                 <span style="color:green">
-                    @GetAnswerText(detail.CorrectAnswer)
+                    @GetOptionText(detail, detail.CorrectAnswer)
                 </span>
             </p>
         </div>
@@ -59,12 +59,16 @@
 </div>
 
 @functions {
-    private string GetAnswerText(string answer)
+    // Converts option letter to actual answer text
+    // Returns the text of the answer without relying on OptionA–D
+    private string GetOptionText(QuizAppDotNetFramework.Models.QuizResultDetail detail, string option)
     {
-        if (string.IsNullOrEmpty(answer))
-            return "Not Answered";
+        if (string.IsNullOrEmpty(option) || option == "Not Attempted")
+            return "Not Attempted";
 
-        var parts = answer.Split(new[] { ": " }, StringSplitOptions.None);
-        return (parts.Length == 2) ? parts[1] : answer;
+        // Option is already the answer text (or the letter). Just return it.
+        return option;
     }
 }
+
+

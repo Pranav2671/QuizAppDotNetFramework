@@ -7,5 +7,11 @@ namespace QuizAppDotNetFramework.Models
         public string CorrectAnswer { get; set; }  // Correct answer
         public string YourAnswer { get; set; }     // Answer chosen by the user
         public bool IsCorrect { get; set; }        // True if the user was correct
+
+
+        public string OptionA { get; set; }
+        public string OptionB { get; set; }
+        public string OptionC { get; set; }
+        public string OptionD { get; set; }
     }
 }

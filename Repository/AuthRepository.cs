@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using Newtonsoft.Json;
-using System.Configuration;
 
 namespace QuizAppDotNetFramework.Repository
 {
@@ -40,6 +40,39 @@ namespace QuizAppDotNetFramework.Repository
             {
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.Add("@JsonData", SqlDbType.NVarChar).Value = jsonData;
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        // Get user by username (for backward-compatible hashed login)
+        public DataTable GetUserByUsername(string username)
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand("GetUserByUsername", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@Username", username);
+
+                using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                {
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    return dt;
+                }
+            }
+        }
+
+        // Update user password (for upgrading plain password to hashed)
+        public void UpdateUserPassword(string username, string newHashedPassword)
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand("UpdateUserPassword", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@Username", username);
+                cmd.Parameters.AddWithValue("@Password", newHashedPassword);
+
                 con.Open();
                 cmd.ExecuteNonQuery();
             }

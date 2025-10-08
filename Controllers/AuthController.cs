@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Web.Mvc;
 using QuizAppDotNetFramework.Repository;
+using QuizAppDotNetFramework.Helpers; // ✅ For password hashing
+using System.Data; // ✅ Needed for DataTable
 
 namespace QuizAppDotNetFramework.Controllers
 {
@@ -22,33 +24,68 @@ namespace QuizAppDotNetFramework.Controllers
         {
             try
             {
-                string passwordHash = password; // Hash if needed
+                // ✅ Step 1: Get user by username
+                DataTable dt = authRepo.GetUserByUsername(username);
 
-                var dt = authRepo.LoginUser(username, passwordHash);
-
-                if (dt.Rows.Count > 0)
+                if (dt.Rows.Count == 0)
                 {
-                    string dbRole = dt.Rows[0]["Role"].ToString();
-
-                    if (!role.Equals(dbRole, StringComparison.OrdinalIgnoreCase))
-                    {
-                        ViewBag.Error = "Selected role does not match your account.";
-                        return View("Login");
-                    }
-
-                    // Set session
-                    Session["UserId"] = dt.Rows[0]["UserId"];
-                    Session["Username"] = dt.Rows[0]["Username"];
-                    Session["Role"] = dbRole;
-
-                    // Role-based redirect
-                    if (dbRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))
-                        return RedirectToAction("Index", "Admin");
-                    else if (dbRole.Equals("User", StringComparison.OrdinalIgnoreCase))
-                        return RedirectToAction("Index", "User");
+                    ViewBag.Error = "Invalid username, password, or role selection.";
+                    return View("Login");
                 }
 
-                ViewBag.Error = "Invalid username, password, or role selection.";
+                string storedPassword = dt.Rows[0]["Password"].ToString();
+                string dbRole = dt.Rows[0]["Role"].ToString();
+                string userId = dt.Rows[0]["UserId"].ToString();
+                string dbUsername = dt.Rows[0]["Username"].ToString();
+
+                bool loginSuccess = false;
+
+                // ✅ Step 2: Check if stored password looks like a hash (64 hex chars)
+                if (storedPassword.Length == 64)
+                {
+                    // Compare hashed input with stored hash
+                    string inputHash = PasswordHelper.HashPassword(password);
+                    if (storedPassword.Equals(inputHash, StringComparison.OrdinalIgnoreCase))
+                        loginSuccess = true;
+                }
+                else
+                {
+                    // Old plain-text password: check directly
+                    if (storedPassword == password)
+                    {
+                        loginSuccess = true;
+
+                        // ✅ Step 3: Upgrade password to hashed version
+                        string newHashed = PasswordHelper.HashPassword(password);
+                        authRepo.UpdateUserPassword(username, newHashed);
+                    }
+                }
+
+                if (!loginSuccess)
+                {
+                    ViewBag.Error = "Invalid username, password, or role selection.";
+                    return View("Login");
+                }
+
+                // ✅ Step 4: Role check
+                if (!role.Equals(dbRole, StringComparison.OrdinalIgnoreCase))
+                {
+                    ViewBag.Error = "Selected role does not match your account.";
+                    return View("Login");
+                }
+
+                // ✅ Step 5: Set session values
+                Session["UserId"] = userId;
+                Session["Username"] = dbUsername;
+                Session["Role"] = dbRole;
+
+                // ✅ Step 6: Redirect based on role
+                if (dbRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                    return RedirectToAction("Index", "Admin");
+                else if (dbRole.Equals("User", StringComparison.OrdinalIgnoreCase))
+                    return RedirectToAction("Index", "User");
+
+                ViewBag.Error = "Invalid role selection.";
                 return View("Login");
             }
             catch (Exception ex)
@@ -71,15 +108,17 @@ namespace QuizAppDotNetFramework.Controllers
         {
             try
             {
-                string passwordHash = password; // Hash if needed
-                string role = "User";           // Force all new users to be "User"
+                // ✅ Hash the password before saving
+                string passwordHash = PasswordHelper.HashPassword(password);
+                string role = "User"; // Default role stays the same
 
+                // ✅ Save hashed password
                 authRepo.RegisterUser(username, passwordHash, role);
 
                 TempData["Success"] = "Registration successful! Please login.";
                 return RedirectToAction("Login");
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 ViewBag.Error = "Registration failed: " + ex.Message;
                 return View();
@@ -87,11 +126,10 @@ namespace QuizAppDotNetFramework.Controllers
         }
 
         // POST: Logout
-        //[HttpPost]
         public ActionResult Logout()
         {
-            Session.Clear(); // Clear session data
-            return RedirectToAction("Login", "Auth"); // Redirect to login page
+            Session.Clear();
+            return RedirectToAction("Login", "Auth");
         }
     }
 }

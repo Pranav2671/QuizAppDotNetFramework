@@ -106,7 +106,7 @@
 <body>
     <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
         <div class="container">
-            @Html.ActionLink("QuizApp", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            <span class="navbar-brand">QuizApp</span>
             <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -145,13 +145,13 @@
                     </ul>
                 }
                 @*else
-                {
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="btn btn-primary rounded-pill" href="@Url.Action("Login", "Auth")">Login</a>
-                        </li>
-                    </ul>
-                }*@
+            {
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="btn btn-primary rounded-pill" href="@Url.Action("Login", "Auth")">Login</a>
+                    </li>
+                </ul>
+            }*@
             </div>
         </div>
     </nav>

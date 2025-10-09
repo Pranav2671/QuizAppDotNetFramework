@@ -1,12 +1,31 @@
-﻿<!DOCTYPE html>
+﻿@using QuizAppDotNetFramework.Helpers
+@{
+    ViewBag.Title = "Login";
+    JwtClaims claims = null;
+    var jwtCookie = Request.Cookies["QuizAppJWT"];
+    if (jwtCookie != null)
+    {
+        try
+        {
+            claims = JwtHelper.ValidateAndGetClaims(jwtCookie.Value);
+        }
+        catch
+        {
+            claims = null; // Invalid token won't break the layout
+        }
+    }
+}
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - My ASP.NET Application</title>
+    <title>@ViewBag.Title - QuizApp</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    @RenderSection("styles", required: false)
 
     <style>
         body {
@@ -14,7 +33,6 @@
             background-color: #f8f9fa;
         }
 
-        /* Navbar styles */
         .navbar {
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
@@ -32,7 +50,6 @@
                 color: #ffd700 !important;
             }
 
-        /* Button styles */
         .btn-primary {
             background: linear-gradient(90deg, #4e54c8, #8f94fb);
             border: none;
@@ -66,7 +83,6 @@
                 box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             }
 
-        /* Footer styles */
         footer {
             background-color: #343a40;
             color: #fff;
@@ -82,41 +98,57 @@
                 font-size: 0.9rem;
             }
 
-        /* Body content spacing */
         .body-content {
             padding: 40px 0;
         }
     </style>
-
-    @RenderSection("styles", required: false)
 </head>
 <body>
     <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
         <div class="container">
             @Html.ActionLink("QuizApp", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
-            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Toggle navigation" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
+            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
             <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
                 <ul class="navbar-nav flex-grow-1">
-                    <li>@Html.ActionLink("   ", "Index", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("     ", "About", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("      ", "Contact", "Home", new { area = "" }, new { @class = "nav-link" })</li>
+                    <li>@Html.ActionLink("Home", "Index", "Home", null, new { @class = "nav-link" })</li>
+                    <li>@Html.ActionLink("About", "About", "Home", null, new { @class = "nav-link" })</li>
+                    <li>@Html.ActionLink("Contact", "Contact", "Home", null, new { @class = "nav-link" })</li>
                 </ul>
 
-                @if (Session["Role"] != null && Session["Role"].ToString() == "User")
+                @if (claims != null)
+                {
+                    <ul class="navbar-nav">
+                        @if (claims.Role == "User")
+                        {
+                            <li class="nav-item">
+                                <a class="btn btn-secondary me-2 rounded-pill" href="@Url.Action("QuizHistory", "User")">Quiz History</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-primary me-2 rounded-pill" href="@Url.Action("Index", "User")">Home</a>
+                            </li>
+                        }
+                        else if (claims.Role == "Admin")
+                        {
+                            <li class="nav-item">
+                                <a class="btn btn-primary me-2 rounded-pill" href="@Url.Action("Index", "Admin")">Admin Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-danger me-2 rounded-pill" href="@Url.Action("ManageUsers", "Admin")">Manage Users</a>
+                            </li>
+                        }
+
+                        <li class="nav-item">
+                            <a class="btn btn-danger rounded-pill" href="@Url.Action("Logout", "Auth")">Logout</a>
+                        </li>
+                    </ul>
+                }
+                else
                 {
                     <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="btn btn-secondary me-2 rounded-pill" href="@Url.Action("QuizHistory", "User")">Quiz History</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-primary me-2 rounded-pill" href="@Url.Action("Index", "User")">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-danger rounded-pill" href="@Url.Action("Logout", "Auth")">Logout</a>
+                            <a class="btn btn-primary rounded-pill" href="@Url.Action("Login", "Auth")">Login</a>
                         </li>
                     </ul>
                 }
@@ -135,5 +167,6 @@
     @Scripts.Render("~/bundles/bootstrap")
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     @RenderSection("scripts", required: false)
+
 </body>
 </html>

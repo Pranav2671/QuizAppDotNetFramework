@@ -1,4 +1,5 @@
-﻿using QuizAppDotNetFramework.Models;
+﻿using QuizAppDotNetFramework.Helpers;
+using QuizAppDotNetFramework.Models;
 using QuizAppDotNetFramework.Repository;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Web.Mvc;
 
 namespace QuizAppDotNetFramework.Controllers
 {
+    //[JwtAuthorize]
     public class HomeController : Controller
     {
         private readonly QuizRepository quizRepo;

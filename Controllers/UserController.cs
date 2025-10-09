@@ -1,12 +1,14 @@
-﻿using QuizAppDotNetFramework.Models;
+﻿using QuizAppDotNetFramework.Helpers;
+using QuizAppDotNetFramework.Models;
 using QuizAppDotNetFramework.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 
-namespace QuizAppDotNetFramework.Controllers
+namespace QuizAppDotNetFramework.Helpers
 {
+    [JwtAuthorize("User")]
     public class UserController : Controller
     {
         private readonly QuizRepository quizRepo = new QuizRepository();

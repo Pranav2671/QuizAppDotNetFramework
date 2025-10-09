@@ -1,4 +1,5 @@
-﻿using QuizAppDotNetFramework.Models;
+﻿using QuizAppDotNetFramework.Helpers;
+using QuizAppDotNetFramework.Models;
 using QuizAppDotNetFramework.Repository;
 using System;
 using System.Linq;
@@ -6,6 +7,8 @@ using System.Web.Mvc;
 
 namespace QuizAppDotNetFramework.Controllers
 {
+    // 🔹 Temporarily disabled JwtAuthorize to test if that's the cause of InvalidOperationException
+   [JwtAuthorize("Admin")]
     public class AdminController : Controller
     {
         private readonly QuizRepository quizRepo;
@@ -24,7 +27,18 @@ namespace QuizAppDotNetFramework.Controllers
         // ----------------- ADMIN DASHBOARD -----------------
         public ActionResult Index()
         {
-            return View();
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("DEBUG: Inside Admin/Index before loading data");
+
+                // If we reach here, login and redirect are fine
+                return View();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("DEBUG: Admin Index Exception → " + ex.ToString());
+                throw;
+            }
         }
 
         // ----------------- USER MANAGEMENT -----------------
@@ -150,10 +164,8 @@ namespace QuizAppDotNetFramework.Controllers
         [HttpGet]
         public ActionResult AssignQuiz()
         {
-            // Single user dropdown
             ViewBag.Users = new SelectList(userRepo.GetAllUsers(), "UserId", "Username");
 
-            // Build ViewModel for multi-quiz selection
             var model = new AssignQuizViewModel
             {
                 Users = userRepo.GetAllUsers(),
@@ -177,7 +189,6 @@ namespace QuizAppDotNetFramework.Controllers
             {
                 foreach (var quizId in model.SelectedQuizIds)
                 {
-                    // Avoid duplicate assignments
                     if (!assignedQuizRepo.AssignmentExists(model.SelectedUserId, quizId))
                     {
                         assignedQuizRepo.AddAssignment(new AssignedQuizModel
@@ -202,9 +213,6 @@ namespace QuizAppDotNetFramework.Controllers
             return RedirectToAction("AssignQuiz");
         }
 
-
-
-
         [HttpGet]
         public ActionResult ViewAssignedQuizzes()
         {
@@ -221,7 +229,6 @@ namespace QuizAppDotNetFramework.Controllers
             if (assignment == null)
                 return HttpNotFound();
 
-            // Load dropdown data using actual model properties
             var users = userRepo.GetAllUsers();
             var quizzes = quizRepo.GetAllQuizzes();
 
@@ -230,7 +237,6 @@ namespace QuizAppDotNetFramework.Controllers
 
             return View(assignment);
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -250,7 +256,6 @@ namespace QuizAppDotNetFramework.Controllers
                 }
             }
 
-            // Reload dropdowns in case of validation error
             var users = userRepo.GetAllUsers();
             var quizzes = quizRepo.GetAllQuizzes();
 
@@ -259,7 +264,6 @@ namespace QuizAppDotNetFramework.Controllers
 
             return View(model);
         }
-
 
         public ActionResult DeleteAssignment(Guid id)
         {
@@ -272,5 +276,6 @@ namespace QuizAppDotNetFramework.Controllers
 
             return RedirectToAction("ViewAssignedQuizzes");
         }
+
     }
 }

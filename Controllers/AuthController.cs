@@ -59,7 +59,8 @@ namespace QuizAppDotNetFramework.Helpers
                 {
                     HttpOnly = true,
                     Secure = Request.IsSecureConnection,
-                    Expires = DateTime.Now.AddHours(1),
+                    //Expires = DateTime.Now.AddHours(1),
+                    SameSite = SameSiteMode.Strict,
                     Path = "/"
                 };
                 Response.Cookies.Add(cookie);

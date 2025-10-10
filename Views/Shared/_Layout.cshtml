@@ -11,7 +11,7 @@
         }
         catch
         {
-            claims = null; // Invalid token won't break the layout
+            claims = null;
         }
     }
 }
@@ -28,83 +28,109 @@
     @RenderSection("styles", required: false)
 
     <style>
+        /* 🌌 General Dark Theme Setup */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0d0d0f, #1a1a2e);
+            color: #e4e4e4;
+            min-height: 100vh;
         }
 
+        /* 🧭 Navbar */
         .navbar {
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: linear-gradient(90deg, #141427, #1a1a2e);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .navbar-brand {
-            font-weight: bold;
-            font-size: 1.5rem;
+            font-weight: 700;
+            font-size: 1.6rem;
+            color: #8f94fb !important;
+            text-shadow: 0 0 6px rgba(143, 148, 251, 0.6);
         }
 
         .nav-link {
-            transition: color 0.3s;
+            color: #ccc !important;
+            transition: color 0.3s, text-shadow 0.3s;
         }
 
             .nav-link:hover {
-                color: #ffd700 !important;
+                color: #8f94fb !important;
+                text-shadow: 0 0 5px #8f94fb;
             }
 
+        /* ✨ Buttons with glow effects */
         .btn-primary {
-            background: linear-gradient(90deg, #4e54c8, #8f94fb);
+            background: linear-gradient(90deg, #6a11cb, #2575fc);
             border: none;
-            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 12px rgba(101, 87, 255, 0.4);
+            transition: all 0.3s;
         }
 
             .btn-primary:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                transform: translateY(-3px);
+                box-shadow: 0 0 20px rgba(101, 87, 255, 0.7);
             }
 
         .btn-secondary {
-            background: #6c757d;
+            background: #343a40;
             border: none;
-            transition: transform 0.2s, box-shadow 0.2s;
+            color: #fff;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
         }
 
             .btn-secondary:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                background: #4a4f57;
+                box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
             }
 
         .btn-danger {
-            background: linear-gradient(90deg, #ff4e50, #f9d423);
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
             border: none;
-            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 12px rgba(255, 77, 77, 0.4);
+            transition: all 0.3s;
         }
 
             .btn-danger:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                transform: translateY(-3px);
+                box-shadow: 0 0 20px rgba(255, 77, 77, 0.7);
             }
 
+        /* 📦 Body Content (alignment restored) */
+        .body-content {
+            padding: 60px 15px;
+            /* Removed text-align: center; */
+        }
+
+        /* 💫 Footer */
         footer {
-            background-color: #343a40;
-            color: #fff;
-            padding: 15px 0;
+            background: linear-gradient(90deg, #141427, #1a1a2e);
+            color: #bbb;
+            padding: 20px 0;
             text-align: center;
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
-            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
         }
 
             footer p {
                 margin: 0;
-                font-size: 0.9rem;
+                letter-spacing: 0.5px;
             }
 
-        .body-content {
-            padding: 40px 0;
+        /* 🟣 Animations */
+        .btn, .navbar-brand {
+            transition: all 0.3s ease;
         }
+
+            .btn:focus, .nav-link:focus {
+                outline: none;
+                box-shadow: none;
+            }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-sm navbar-dark">
         <div class="container">
             <span class="navbar-brand">QuizApp</span>
             <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
@@ -134,24 +160,20 @@
                             <li class="nav-item">
                                 <a class="btn btn-primary me-2 rounded-pill" href="@Url.Action("Index", "Admin")">Admin Dashboard</a>
                             </li>
-                            @*<li class="nav-item">
-                                <a class="btn btn-danger me-2 rounded-pill" href="@Url.Action("ManageUsers", "Admin")">Manage Users</a>
-                            </li>*@
                         }
-
                         <li class="nav-item">
                             <a class="btn btn-danger rounded-pill" href="@Url.Action("Logout", "Auth")">Logout</a>
                         </li>
                     </ul>
                 }
                 @*else
-            {
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="btn btn-primary rounded-pill" href="@Url.Action("Login", "Auth")">Login</a>
-                    </li>
-                </ul>
-            }*@
+                    {
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="btn btn-primary rounded-pill" href="@Url.Action("Login", "Auth")">Login</a>
+                            </li>
+                        </ul>
+                    }*@
             </div>
         </div>
     </nav>
@@ -167,6 +189,5 @@
     @Scripts.Render("~/bundles/bootstrap")
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     @RenderSection("scripts", required: false)
-
 </body>
 </html>
